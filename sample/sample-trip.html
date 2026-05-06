@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SF jet-lag plan</title>
+<style>
+  :root { --bg: #fafaf9; --card: #fff; --fg: #0f172a; --fg-soft: #475569; --fg-faint: #94a3b8;
+    --accent: #047857; --accent-soft: #d1fae5; --melatonin: #7c3aed; --strong: #f59e0b;
+    --soft: #cbd5e1; --sleep: #0f172a; --caf: #92400e; --travel: #0ea5e9; --note: #b91c1c;
+    --border: #e7e5e4; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 32px 16px 80px; }
+  .topnav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .back { color: var(--fg-soft); text-decoration: none; font-size: 13px; }
+  .label { font-size: 11px; font-weight: 600; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; }
+  h1 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.02em; }
+  .sub { color: var(--fg-soft); font-size: 13px; margin: 0 0 22px; }
+
+  /* Status pill row */
+  .status-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; min-height: 28px; }
+  .pill { display: inline-flex; align-items: center; gap: 6px;
+    background: var(--accent); color: white; font-size: 10px; font-weight: 700;
+    letter-spacing: 0.12em; padding: 5px 10px; border-radius: 99px; text-transform: uppercase; }
+  .pill.viewing { background: var(--fg); }
+  .back-pill { display: none; align-items: center; gap: 4px; font-size: 12px; color: var(--accent);
+    background: var(--accent-soft); padding: 5px 10px; border-radius: 99px; cursor: pointer;
+    border: none; font-weight: 600; }
+  .back-pill.shown { display: inline-flex; }
+
+  /* Focus card */
+  .focus-card { background: var(--card); border: 1px solid var(--border);
+    border-radius: 18px; padding: 26px 24px; margin-bottom: 22px;
+    box-shadow: 0 4px 18px -8px rgba(15,23,42,0.1);
+    transition: opacity 0.18s ease; }
+  .focus-card.fading { opacity: 0; }
+  .focus-day { font-size: 28px; font-weight: 600; margin: 4px 0 4px; letter-spacing: -0.02em; }
+  .focus-phase { font-size: 13px; color: var(--fg-soft); margin-bottom: 22px; }
+  .focus-phase .key-tag { display: inline-block; margin-left: 8px; color: var(--strong); font-weight: 700; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+
+  .next-up { font-size: 11px; color: var(--fg-faint); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600; margin-bottom: 12px; }
+  .actions { padding: 0; margin: 0; list-style: none; }
+  .actions li { display: flex; gap: 14px; padding: 13px 0; border-top: 1px solid var(--border); align-items: center; }
+  .actions li:first-child { border-top: none; padding-top: 0; }
+  .when { font-size: 14px; font-weight: 700; color: var(--fg); min-width: 70px; }
+  .what { flex: 1; }
+  .what .h { font-size: 14px; font-weight: 500; line-height: 1.4; }
+  .what .why { font-size: 12px; color: var(--fg-soft); margin-top: 3px; line-height: 1.5; }
+  .what .star { color: var(--melatonin); font-weight: 700; }
+  .icon { width: 36px; height: 36px; border-radius: 10px; display: inline-flex;
+    align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .icon.bed { background: var(--sleep); color: white; }
+  .icon.wake { background: #fef3c7; color: var(--strong); }
+  .icon.lights { background: var(--strong); color: white; }
+  .icon.lightsoft { background: var(--soft); color: var(--fg); }
+  .icon.mel { background: var(--melatonin); color: white; }
+  .icon.caf { background: var(--caf); color: white; }
+  .icon.fly { background: var(--travel); color: white; }
+  .icon.note { background: #fee2e2; color: var(--note); }
+
+  /* Why-this-day expandable inside focus card */
+  details.day-why { margin-top: 18px; border-top: 1px solid var(--border); padding-top: 14px; }
+  details.day-why summary { cursor: pointer; font-size: 12px; color: var(--accent); font-weight: 600; list-style: none; letter-spacing: 0.04em; }
+  details.day-why summary::-webkit-details-marker { display: none; }
+  details.day-why summary::after { content: ' ▾'; }
+  details.day-why[open] summary::after { content: ' ▴'; }
+  details.day-why .body { font-size: 13px; color: var(--fg-soft); margin-top: 10px; line-height: 1.6; }
+
+  /* Horizon strip */
+  .horizon-title { font-size: 11px; color: var(--fg-faint); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600; margin: 6px 0 10px; }
+  .horizon { display: grid; grid-template-columns: repeat(12, 1fr); gap: 5px; }
+  .h-day { background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 8px 2px 6px; text-align: center; min-height: 76px;
+    display: flex; flex-direction: column; justify-content: space-between; align-items: center;
+    cursor: pointer; transition: transform 0.12s, box-shadow 0.12s, border-color 0.12s;
+    user-select: none; -webkit-tap-highlight-color: transparent; }
+  .h-day:hover { transform: translateY(-2px); box-shadow: 0 6px 14px -6px rgba(15,23,42,0.15); }
+  .h-day.active { border-color: var(--accent); border-width: 2px; box-shadow: 0 0 0 2px var(--accent-soft); padding: 7px 1px 5px; }
+  .h-day.key { background: linear-gradient(180deg, #fef3c7 0%, #fff 60%); }
+  .h-day.today { background: linear-gradient(180deg, var(--accent-soft) 0%, #fff 70%); }
+  .h-day .h-num { font-size: 14px; font-weight: 700; }
+  .h-day .h-label { font-size: 9px; color: var(--fg-faint); text-transform: uppercase; letter-spacing: 0.04em; line-height: 1.2; }
+  .h-day .star { font-size: 9px; color: var(--strong); font-weight: 700; }
+  .h-day .dots { display: flex; justify-content: center; gap: 2px; }
+  .h-day .dots span { width: 4px; height: 4px; border-radius: 50%; background: #cbd5e1; }
+  .h-day .dots span.s { background: var(--sleep); }
+  .h-day .dots span.l { background: var(--strong); }
+  .h-day .dots span.m { background: var(--melatonin); }
+
+  .summary-card { margin-top: 22px; padding: 16px 18px; background: #f8fafc;
+    border: 1px solid var(--border); border-radius: 12px;
+    font-size: 13px; color: var(--fg-soft); line-height: 1.6; }
+  .summary-card strong { color: var(--fg); }
+  .summary-card.hidden { display: none; }
+
+  /* Collapsible context sections — minimalist, subtle */
+  .context-stack { margin-top: 36px; }
+  details.ctx { background: transparent; border: none; padding: 0; margin-bottom: 4px; }
+  details.ctx > summary {
+    cursor: pointer; padding: 14px 4px; list-style: none;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+    transition: background 0.12s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  details.ctx > summary:hover { background: rgba(0,0,0,0.02); }
+  details.ctx > summary::-webkit-details-marker { display: none; }
+  details.ctx > summary .chev { color: var(--fg-faint); font-size: 12px; transition: transform 0.18s; min-width: 14px; }
+  details.ctx[open] > summary .chev { transform: rotate(90deg); color: var(--accent); }
+  details.ctx > summary .ctx-title { font-size: 14px; font-weight: 600; color: var(--fg); flex: 1; }
+  details.ctx > summary .ctx-meta { font-size: 11px; color: var(--fg-faint); }
+  details.ctx > .ctx-body { padding: 8px 0 22px 24px; }
+
+  /* Inside-context content */
+  .perso-grid { display: grid; gap: 10px; grid-template-columns: repeat(2, 1fr); margin-bottom: 14px; }
+  @media (min-width: 600px) { .perso-grid { grid-template-columns: repeat(4, 1fr); } }
+  .perso-stat { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+  .perso-stat .num { font-size: 16px; font-weight: 600; }
+  .perso-stat .label { font-size: 10px; color: var(--fg-soft); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+  .perso-stat .read { font-size: 11px; color: var(--fg-soft); margin-top: 6px; line-height: 1.45; }
+  .perso-stat.ok { border-left: 3px solid var(--accent); }
+  .perso-stat.flag { border-left: 3px solid var(--strong); }
+  .perso-adj { border-left: 3px solid var(--melatonin); padding: 10px 14px;
+    background: #faf5ff; border-radius: 0 10px 10px 0; margin-bottom: 8px; }
+  .perso-adj .head { font-weight: 600; font-size: 13px; color: var(--accent); margin-bottom: 4px; }
+  .perso-adj .body { font-size: 12px; color: var(--fg-soft); line-height: 1.5; }
+
+  .traj-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 12px; }
+  .traj-wrap svg { display: block; min-width: 720px; max-width: 100%; height: auto; }
+  .caption { font-size: 12px; color: var(--fg-soft); line-height: 1.55; }
+
+  .moment { display: flex; gap: 12px; padding: 10px 0; border-top: 1px solid var(--border); align-items: flex-start; }
+  .moment:first-child { border-top: none; padding-top: 0; }
+  .moment .num { width: 24px; height: 24px; border-radius: 50%; background: var(--melatonin); color: white;
+    font-weight: 700; font-size: 11px; line-height: 24px; text-align: center; flex-shrink: 0; }
+  .moment .when { font-size: 11px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; }
+  .moment .what-l { font-size: 14px; font-weight: 500; margin: 2px 0 4px; }
+  .moment .why-l { font-size: 12px; color: var(--fg-soft); line-height: 1.5; }
+  .moment .text { flex: 1; }
+
+  .prose { max-width: 60ch; }
+  .prose p { font-size: 13px; line-height: 1.6; color: var(--fg-soft); margin: 0 0 12px 0; }
+  .prose strong { color: var(--fg); font-weight: 600; }
+  .refs { font-size: 12px; color: var(--fg-faint); margin-top: 14px; line-height: 1.6; }
+
+  @media (max-width: 540px) {
+    .horizon { grid-template-columns: repeat(6, 1fr); }
+    .horizon .h-day:nth-child(n+13) { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topnav">
+    <a class="back" href="https://github.com/Wolbyworld/jet-lag-protocol">← View on GitHub</a>
+    <span class="label">Sample plan</span>
+  </div>
+  <h1>SF jet-lag plan</h1>
+  <p class="sub">Madrid → SFO → Madrid · 12–22 May 2026 · 9 h delay + 9 h advance</p>
+
+  <div class="status-row">
+    <span class="pill" id="status-pill">Today · D+1</span>
+    <button class="back-pill" id="back-pill" onclick="showToday()">← Back</button>
+  </div>
+
+  <div class="focus-card" id="focus-card"></div>
+
+  <div class="horizon-title">Tap a day</div>
+  <div class="horizon" id="horizon"></div>
+
+  <div class="summary-card" id="summary-card">
+    <strong>Today's job:</strong> sleep block + morning sun + dim evening + bedtime melatonin. Three high-leverage moments still ahead — Tue 19 in-flight melatonin, Tue 19 in-flight sleep, Wed 20 outdoor sun on landing in Madrid.<br><br>
+    <strong>Hardest day coming:</strong> Wed 20 May (R+0). Plan for resisting the post-flight nap.
+  </div>
+
+  <!-- ======== COLLAPSIBLE CONTEXT ======== -->
+  <div class="context-stack">
+
+    <details class="ctx">
+      <summary>
+        <span class="chev">▸</span>
+        <span class="ctx-title">Personalized for you</span>
+        <span class="ctx-meta">Garmin · last 7 days</span>
+      </summary>
+      <div class="ctx-body">
+        <div class="perso-grid">
+          <div class="perso-stat ok"><div class="num">75</div><div class="label">Sleep score 7d</div><div class="read">FAIR. Two short nights early week pulled the avg down.</div></div>
+          <div class="perso-stat ok"><div class="num">6h11</div><div class="label">Sleep duration</div><div class="read">Shorter than 7h+ default. You're a lean sleeper.</div></div>
+          <div class="perso-stat ok"><div class="num">110/100</div><div class="label">HRV last/weekly (ms)</div><div class="read">BALANCED, above your baseline upper bound (108).</div></div>
+          <div class="perso-stat ok"><div class="num">35–37</div><div class="label">RHR (bpm)</div><div class="read">Athlete-level baseline, stable. No illness flag.</div></div>
+          <div class="perso-stat ok"><div class="num">73→92</div><div class="label">Body battery max</div><div class="read">Trending up.</div></div>
+          <div class="perso-stat flag"><div class="num">17/POOR</div><div class="label">Training readiness</div><div class="read">After this morning's HIIT — recovery time 78h.</div></div>
+          <div class="perso-stat flag"><div class="num">890</div><div class="label">Acute training load</div><div class="read">High. 7 sessions in 7 days.</div></div>
+          <div class="perso-stat ok"><div class="num">22:34/05:09</div><div class="label">Avg bedtime/wake</div><div class="read">Earlier wake than I'd defaulted to.</div></div>
+        </div>
+        <div class="perso-adj">
+          <div class="head">Mon 11 May bedtime moved 21:00 → 22:00</div>
+          <div class="body">Your real sleep target is ~6h30, not 7h+. With a 04:30 Tue wake, the sleep-bank rule lands at 22:00 — your sleep gate. The 21:00 we had initially would have pushed into your wake-maintenance zone.</div>
+        </div>
+        <div class="perso-adj">
+          <div class="head">Training taper Sun 10 → Wed 13 May</div>
+          <div class="body">Acute load 890 with today's training readiness 17/POOR is heavy fatigue. Drop HIIT from Sun 10 → Wed 13. Easy aerobic running is fine — recovery-positive at your current load.</div>
+        </div>
+        <div class="perso-adj">
+          <div class="head">No protocol-intensity softening</div>
+          <div class="body">HRV BALANCED, RHR stable, body battery trending up. Run the protocol at full nominal intensity — 1.5h/day delay outbound, 1.0h/day advance return.</div>
+        </div>
+      </div>
+    </details>
+
+    <details class="ctx">
+      <summary>
+        <span class="chev">▸</span>
+        <span class="ctx-title">The convergence story</span>
+        <span class="ctx-meta">Why the plan has this shape</span>
+      </summary>
+      <div class="ctx-body">
+        <div class="traj-wrap">
+          <svg viewBox="0 0 860 220" xmlns="http://www.w3.org/2000/svg">
+            <g font-size="9" fill="#94a3b8" text-anchor="end">
+              <text x="68" y="36">12:00</text>
+              <text x="68" y="76">18:00</text>
+              <text x="68" y="116">00:00</text>
+              <text x="68" y="156">06:00</text>
+              <text x="68" y="196">12:00</text>
+            </g>
+            <g stroke="#e7e5e4" stroke-width="0.8">
+              <line x1="74" y1="32" x2="850" y2="32"/>
+              <line x1="74" y1="72" x2="850" y2="72"/>
+              <line x1="74" y1="112" x2="850" y2="112"/>
+              <line x1="74" y1="152" x2="850" y2="152"/>
+              <line x1="74" y1="192" x2="850" y2="192"/>
+            </g>
+            <g font-size="9" fill="#94a3b8" text-anchor="middle">
+              <text x="105" y="212">Sun 10</text><text x="170" y="212">Mon 11</text><text x="235" y="212">Tue 12</text><text x="300" y="212">Wed 13</text><text x="365" y="212">Thu 14</text><text x="430" y="212">Fri 15</text><text x="495" y="212">Sat 16</text><text x="560" y="212">Sun 17</text><text x="625" y="212">Mon 18</text><text x="690" y="212">Tue 19</text><text x="755" y="212">Wed 20</text><text x="820" y="212">Thu 21</text>
+            </g>
+            <line x1="74" y1="89" x2="850" y2="89" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,3" opacity="0.7"/>
+            <text x="80" y="86" font-size="9" fill="#475569" font-weight="600">MAD DLMO target</text>
+            <line x1="74" y1="149" x2="850" y2="149" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,3" opacity="0.7"/>
+            <text x="80" y="146" font-size="9" fill="#475569" font-weight="600">SFO DLMO target</text>
+            <rect x="74" y="22" width="130" height="180" fill="#dbeafe" opacity="0.25"/>
+            <text x="139" y="38" text-anchor="middle" font-size="9" fill="#1e40af" font-weight="600">pre-flight</text>
+            <rect x="204" y="22" width="65" height="180" fill="#fef3c7" opacity="0.4"/>
+            <text x="237" y="38" text-anchor="middle" font-size="9" fill="#92400e" font-weight="600">travel</text>
+            <rect x="269" y="22" width="260" height="180" fill="#dcfce7" opacity="0.25"/>
+            <text x="399" y="38" text-anchor="middle" font-size="9" fill="#166534" font-weight="600">SF adaptation</text>
+            <rect x="529" y="22" width="130" height="180" fill="#fef3c7" opacity="0.4"/>
+            <text x="594" y="38" text-anchor="middle" font-size="9" fill="#92400e" font-weight="600">pre-return</text>
+            <rect x="659" y="22" width="65" height="180" fill="#fef3c7" opacity="0.4"/>
+            <text x="691" y="38" text-anchor="middle" font-size="9" fill="#92400e" font-weight="600">travel</text>
+            <rect x="724" y="22" width="126" height="180" fill="#dbeafe" opacity="0.25"/>
+            <text x="787" y="38" text-anchor="middle" font-size="9" fill="#1e40af" font-weight="600">recovery</text>
+            <path d="M 105,89 L 170,89 L 235,92 L 300,102 L 365,114 L 430,128 L 495,138 L 560,149 L 625,142 L 690,135 L 755,120 L 820,102" stroke="#047857" stroke-width="2.5" fill="none"/>
+            <g fill="#047857" stroke="white" stroke-width="1">
+              <circle cx="105" cy="89" r="3.5"/><circle cx="170" cy="89" r="3.5"/><circle cx="235" cy="92" r="3.5"/><circle cx="300" cy="102" r="3.5"/><circle cx="365" cy="114" r="3.5"/><circle cx="430" cy="128" r="3.5"/><circle cx="495" cy="138" r="3.5"/><circle cx="560" cy="149" r="3.5"/><circle cx="625" cy="142" r="3.5"/><circle cx="690" cy="135" r="3.5"/><circle cx="755" cy="120" r="3.5"/><circle cx="820" cy="102" r="3.5"/>
+            </g>
+          </svg>
+        </div>
+        <p class="caption">Green line = your body's DLMO drifting across the trip. Sun–Mon: small drift. Tue: travel. Wed–Sat: drifts toward SFO target as light + melatonin push the clock later. Sun–Mon (return prep): pulls back early. Tue: long sleep block on the eastward flight does the heavy lifting. Wed–Thu: arrival sunlight + bedtime melatonin completes re-entrainment.</p>
+
+        <div style="margin-top: 22px;">
+          <div class="next-up" style="margin-bottom: 10px;">Five high-leverage moments</div>
+          <div class="moment"><div class="num">1</div><div class="text"><div class="when">Mon 11 · 22:00 CEST</div><div class="what-l">Sleep-bank night</div><div class="why-l">Bedtime calibrated to your 6h30 target before the early flight. Without it: 4 h sleep deficit on top of 9 h jet lag.</div></div></div>
+          <div class="moment"><div class="num">2</div><div class="text"><div class="when">Tue 12 · 14:00–18:00 PT</div><div class="what-l">Outdoor sun on SF arrival</div><div class="why-l">Lands in the peak of the delay PRC for your body's evening. Single biggest free dose of phase-shifting power.</div></div></div>
+          <div class="moment"><div class="num">3</div><div class="text"><div class="when">Tue 19 · 18:30 PT</div><div class="what-l">0.5 mg melatonin shortly after takeoff</div><div class="why-l">3 h before SF-adapted DLMO — exact peak-advance window of the 0.5 mg PRC (Burgess 2010).</div></div></div>
+          <div class="moment"><div class="num">4</div><div class="text"><div class="when">Tue 19 18:45 → Wed 20 02:00 PT</div><div class="what-l">Sleep through the eastward flight</div><div class="why-l">Covers MAD's 04:00–11:00 — exactly the destination night you're entraining to.</div></div></div>
+          <div class="moment"><div class="num">5</div><div class="text"><div class="when">Wed 20 · 13:00–18:00 CEST</div><div class="what-l">Outdoor light on landing in Madrid</div><div class="why-l">Body's biological morning post-CBT_min — light delivers maximum advance shift. The "just one nap" failure here costs days.</div></div></div>
+        </div>
+      </div>
+    </details>
+
+    <details class="ctx">
+      <summary>
+        <span class="chev">▸</span>
+        <span class="ctx-title">Methodology &amp; sources</span>
+        <span class="ctx-meta">8 papers, every constant traceable</span>
+      </summary>
+      <div class="ctx-body">
+        <div class="prose">
+          <p>This plan was generated by a circadian phase-shift algorithm that applies eleven rules grounded in primary sleep-medicine literature. Every numerical constant traces back to a specific study.</p>
+          <p><strong>Westward delays are easier than eastward advances.</strong> Human τ ≈ 24.2 h, slightly long, so the body drifts later naturally. With full intervention you can shift ~1.5 h/day west, ~1.0 h/day east. That's why SF outbound recovery is 4 days but the return is closer to 6.</p>
+          <p><strong>Light is more powerful than melatonin.</strong> Properly-timed bright outdoor light shifts the clock 2–3× more than 0.5 mg melatonin per dose. Melatonin's job is to make sleep happen at the right time so the next day's light dose lands in the right window.</p>
+          <p><strong>Caffeine is for alertness, not for shifting.</strong> ~40 min phase delay from a strong dose, half the magnitude of evening bright light. Cutoffs exist to protect sleep, not to drive the clock.</p>
+        </div>
+        <div class="refs">
+          <strong style="color: var(--fg);">Primary literature:</strong> Khalsa et al. 2003 (light PRC) · Burgess et al. 2010 (0.5 mg melatonin PRC) · Zeitzer et al. 2000 (light dose-response) · Burke et al. 2015 (caffeine pharmacology) · Eastman &amp; Burgess 2009 (operational protocols) · Borbély 1982 (two-process sleep model) · Burgess 2014 + Kantermann 2015 (DLMO from chronotype).
+        </div>
+      </div>
+    </details>
+
+  </div>
+</div>
+
+<script>
+const days = [
+  { date: "2026-05-10", num: 10, dayShort: "Sun", phaseLabel: "D−2 · MAD", title: "Sun, 10 May", phaseFull: "Pre-flight · Day 1 — small drift later", isKey: false,
+    actions: [
+      { type: "wake", time: "06:30", h: "Wake", why: "Sunglasses outside before 09:00 — stops morning light from advancing your clock against the delay direction." },
+      { type: "caf", time: "14:00", h: "Last coffee" },
+      { type: "lights", time: "19:00", h: "Outdoor walk after dinner", why: "Bright evening light helps you stay up later — small delay drift." },
+      { type: "bed", time: "23:00", h: "Bed", why: "30 min later than usual." }
+    ], dots: ["s","l",""] },
+  { date: "2026-05-11", num: 11, dayShort: "Mon", phaseLabel: "D−1 · sleep-bank ★", title: "Mon, 11 May", phaseFull: "Sleep-bank night · D−1", isKey: true,
+    actions: [
+      { type: "wake", time: "05:30", h: "Wake earlier than usual" },
+      { type: "caf", time: "11:00", h: "Last coffee", why: "Early cutoff to protect tonight's sleep." },
+      { type: "lights", time: "16:00", h: "Outdoor walk — last evening light dose" },
+      { type: "mel", time: "21:30", h: "0.5 mg melatonin (sleep aid)", star: true },
+      { type: "bed", time: "22:00", h: "Bed early", star: true, why: "Sleep gate opens around now. 6.5 h before tomorrow's 04:30 alarm." }
+    ], dots: ["s","l","m"], why: "The night before an early flight is sleep-banking, not phase-shifting. Pushing later via the protocol would leave you with 4 h sleep before a 24 h day. Bed at 22:00 lands at your sleep gate." },
+  { date: "2026-05-12", num: 12, dayShort: "Tue ✈", phaseLabel: "D+0 · MAD→SFO ★", title: "Tue, 12 May", phaseFull: "Travel day · MAD → SFO", isKey: true,
+    actions: [
+      { type: "wake", time: "04:30", h: "Alarm" },
+      { type: "fly", time: "05:00", h: "MAD → LHR feeder" },
+      { type: "fly", time: "10:45", h: "LHR → SFO (11 h)" },
+      { type: "caf", time: "in-flight", h: "Caffeine first half. Cutoff 16:00 BST." },
+      { type: "bed", time: "~10:00 PT", h: "Sleep last 3 h of flight, eye mask" },
+      { type: "lights", time: "14:00 PT", h: "Outside immediately on landing", star: true, why: "Biggest free phase shift of the trip. 4 h direct sunlight 14:00–18:00 PT." },
+      { type: "lightsoft", time: "20:00 PT", h: "Dim everything" },
+      { type: "mel", time: "22:00 PT", h: "0.5 mg melatonin" },
+      { type: "bed", time: "22:30 PT", h: "Bed (destination clock)" }
+    ], dots: ["s","l","m"], why: "The arrival-light dose is the trip's biggest free intervention. Stay outside 14:00–18:00 PT, even if you're tired." },
+  { date: "2026-05-13", num: 13, dayShort: "Wed", phaseLabel: "D+1 · SF · adapt", title: "Wed, 13 May", phaseFull: "Adapting to SF · Day 1 in destination", isKey: false,
+    actions: [
+      { type: "lights", time: "08:00", h: "Outdoor walk, 30+ min", why: "Strong-seek light entrains wake — your dominant zeitgeber." },
+      { type: "caf", time: "13:00", h: "Last coffee", why: "~5 h half-life means consumption past here disrupts tonight." },
+      { type: "note", time: "14:00", h: "Coffee with a colleague", why: "Outdoor cafe if possible — extends your light dose." },
+      { type: "mel", time: "21:30", h: "0.5 mg melatonin" },
+      { type: "bed", time: "22:00", h: "Bed", why: "Body says 07:00 home time. Eye mask, blackout, no screens past 21:30." }
+    ], dots: ["s","l","m"] },
+  { date: "2026-05-14", num: 14, dayShort: "Thu", phaseLabel: "D+2 · SF", title: "Thu, 14 May", phaseFull: "SF · Day 2 — easier", isKey: false,
+    actions: [
+      { type: "wake", time: "06:00", h: "Wake naturally easier today" },
+      { type: "lights", time: "08:00–12:00", h: "Outside — outdoor meetings clustered in the morning" },
+      { type: "caf", time: "13:00", h: "Last coffee" },
+      { type: "mel", time: "22:00", h: "0.5 mg melatonin" },
+      { type: "bed", time: "22:30", h: "Bed" }
+    ], dots: ["s","l","m"] },
+  { date: "2026-05-15", num: 15, dayShort: "Fri", phaseLabel: "D+3 · ~adapted", title: "Fri, 15 May", phaseFull: "~80% adapted — drop intensity", isKey: false,
+    actions: [
+      { type: "wake", time: "06:00", h: "Normal SF day" },
+      { type: "caf", time: "14:00", h: "Coffee cutoff back to normal" },
+      { type: "bed", time: "22:30", h: "Bed — melatonin optional" }
+    ], dots: ["s","l",""] },
+  { date: "2026-05-16", num: 16, dayShort: "Sat", phaseLabel: "D+4 · adapted", title: "Sat, 16 May", phaseFull: "Fully adapted — no protocol", isKey: false,
+    actions: [{ type: "wake", time: "all day", h: "Live as a local. No protocol today." }], dots: ["s","",""] },
+  { date: "2026-05-17", num: 17, dayShort: "Sun", phaseLabel: "D−2 ret · advance", title: "Sun, 17 May", phaseFull: "Pre-return advance starts", isKey: false,
+    actions: [
+      { type: "wake", time: "06:00", h: "Bright light immediately on wake" },
+      { type: "caf", time: "11:00", h: "Caffeine cutoff moves earlier" },
+      { type: "note", time: "17:00", h: "Summit begins (destination area)" },
+      { type: "mel", time: "16:30", h: "0.5 mg melatonin (afternoon advance)" },
+      { type: "bed", time: "21:30", h: "Bed earlier than yesterday" }
+    ], dots: ["s","l","m"] },
+  { date: "2026-05-18", num: 18, dayShort: "Mon", phaseLabel: "D−1 ret · summit", title: "Mon, 18 May", phaseFull: "Pre-return + summit", isKey: false,
+    actions: [
+      { type: "wake", time: "05:30", h: "Walk before summit kickoff" },
+      { type: "note", time: "02:00 / 03:00", h: "Recurring virtual home-TZ meeting" },
+      { type: "caf", time: "10:00", h: "Caffeine cutoff" },
+      { type: "mel", time: "15:30", h: "0.5 mg melatonin" },
+      { type: "bed", time: "20:30", h: "Bed if summit allows" }
+    ], dots: ["s","l","m"] },
+  { date: "2026-05-19", num: 19, dayShort: "Tue ✈", phaseLabel: "D+0 ret · SFO→MAD ★", title: "Tue, 19 May", phaseFull: "Return travel · SFO → MAD", isKey: true,
+    actions: [
+      { type: "wake", time: "04:30", h: "Wake; bright light immediately" },
+      { type: "caf", time: "11:00", h: "Last coffee — locked, no exceptions" },
+      { type: "lightsoft", time: "14:00", h: "Sunglasses, screens dim from now until takeoff" },
+      { type: "fly", time: "17:45", h: "SFO → MAD departs" },
+      { type: "mel", time: "~18:30", h: "0.5 mg melatonin shortly after takeoff", star: true, why: "By takeoff DLMO ~21:30 PDT. Dose lands 3 h before — exact peak-advance window of 0.5 mg PRC. Doubles as soporific for in-flight sleep." },
+      { type: "bed", time: "~18:45", h: "Sleep on plane (~7 h)", star: true, why: "Covers MAD's 04:00–11:00 — destination night you're entraining to." }
+    ], dots: ["s","l","m"], why: "Two leverage moments back-to-back: in-flight melatonin (peak-advance window) and the long sleep block aligned to MAD's biological night." },
+  { date: "2026-05-20", num: 20, dayShort: "Wed ✈", phaseLabel: "R+0 · land MAD ★", title: "Wed, 20 May", phaseFull: "Arrival in Madrid · the hardest day", isKey: true,
+    actions: [
+      { type: "wake", time: "~02:00 PT", h: "Wake before landing — cabin lights on" },
+      { type: "fly", time: "13:00 CEST", h: "Land MAD" },
+      { type: "lights", time: "13:00–18:00", h: "Outside on landing. No nap. Walk in the city.", star: true, why: "Maximum advance shift here. The 'just one nap' failure mode costs days of recovery." },
+      { type: "mel", time: "20:30", h: "0.5 mg melatonin" },
+      { type: "bed", time: "22:30", h: "Bed" }
+    ], dots: ["s","l","m"], why: "This is the day the protocol is most likely to fail — post-flight fatigue + the 'one nap' temptation. Stay vertical, stay outside, stay on plan." },
+  { date: "2026-05-21", num: 21, dayShort: "Thu", phaseLabel: "R+1 · recovery", title: "Thu, 21 May", phaseFull: "Recovery in Madrid · Day 1", isKey: false,
+    actions: [
+      { type: "wake", time: "06:00", h: "Bright light on wake" },
+      { type: "caf", time: "14:00", h: "Coffee cutoff" },
+      { type: "mel", time: "16:30", h: "0.5 mg melatonin" },
+      { type: "bed", time: "22:30", h: "Bed" }
+    ], dots: ["s","l","m"] },
+];
+
+const iconMap = { bed: "🌙", wake: "↑", lights: "☀", lightsoft: "◐", mel: "●", caf: "☕", fly: "✈", note: "!" };
+
+const focusCard = document.getElementById('focus-card');
+const horizon = document.getElementById('horizon');
+const statusPill = document.getElementById('status-pill');
+const backPill = document.getElementById('back-pill');
+const summaryCard = document.getElementById('summary-card');
+
+// === Compute "today" — index of the day matching today's date, OR the closest day ===
+function computeTripState() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayMs = today.getTime();
+
+  // Exact match
+  for (let i = 0; i < days.length; i++) {
+    const d = new Date(days[i].date);
+    d.setHours(0, 0, 0, 0);
+    if (d.getTime() === todayMs) {
+      return { idx: i, status: 'today' };
+    }
+  }
+
+  // Outside trip range — find closest
+  const firstMs = new Date(days[0].date).setHours(0,0,0,0);
+  const lastMs = new Date(days[days.length-1].date).setHours(0,0,0,0);
+
+  if (todayMs < firstMs) {
+    const daysUntil = Math.round((firstMs - todayMs) / 86400000);
+    return { idx: 0, status: 'before', daysUntil };
+  } else {
+    const daysAgo = Math.round((todayMs - lastMs) / 86400000);
+    return { idx: days.length - 1, status: 'after', daysAgo };
+  }
+}
+
+const tripState = computeTripState();
+const TODAY_INDEX = tripState.status === 'today' ? tripState.idx : -1;
+const DEFAULT_INDEX = tripState.idx;
+
+function renderFocus(idx) {
+  const d = days[idx];
+  if (!d) return;
+  let html = `<div class="focus-day">${d.title}</div>`;
+  html += `<div class="focus-phase">${d.phaseFull}${d.isKey ? '<span class="key-tag">★ Key day</span>' : ''}</div>`;
+  html += `<div class="next-up">${idx === TODAY_INDEX ? "Next 5 actions" : "Actions for this day"}</div>`;
+  html += `<ul class="actions">`;
+  d.actions.forEach(a => {
+    const star = a.star ? '<span class="star">★ </span>' : '';
+    html += `<li><div class="icon ${a.type}">${iconMap[a.type] || '·'}</div><div class="when">${a.time}</div><div class="what"><div class="h">${star}${a.h}</div>${a.why ? `<div class="why">${a.why}</div>` : ''}</div></li>`;
+  });
+  html += `</ul>`;
+  if (d.why) html += `<details class="day-why"><summary>Why this day matters</summary><div class="body">${d.why}</div></details>`;
+  focusCard.classList.add('fading');
+  setTimeout(() => { focusCard.innerHTML = html; focusCard.classList.remove('fading'); }, 120);
+}
+
+function renderHorizon(activeIdx) {
+  horizon.innerHTML = '';
+  days.forEach((d, i) => {
+    const cls = ['h-day'];
+    if (i === activeIdx) cls.push('active');
+    if (i === TODAY_INDEX && activeIdx !== TODAY_INDEX) cls.push('today');
+    if (d.isKey) cls.push('key');
+    const star = d.isKey ? '<span class="star">★</span>' : '';
+    const dots = d.dots.map(c => `<span${c ? ` class="${c}"` : ''}></span>`).join('');
+    const div = document.createElement('div');
+    div.className = cls.join(' ');
+    div.innerHTML = `<div class="h-num">${d.num}</div><div class="h-label">${d.dayShort}</div>${star}<div class="dots">${dots}</div>`;
+    div.addEventListener('click', () => selectDay(i));
+    horizon.appendChild(div);
+  });
+}
+
+function defaultPillText() {
+  if (tripState.status === 'today') return 'Today · ' + days[tripState.idx].phaseLabel.split('·')[0].trim();
+  if (tripState.status === 'before') {
+    const n = tripState.daysUntil;
+    return 'Trip starts in ' + n + ' day' + (n === 1 ? '' : 's');
+  }
+  // after
+  const n = tripState.daysAgo;
+  return 'Trip ended ' + n + ' day' + (n === 1 ? '' : 's') + ' ago';
+}
+
+function selectDay(idx) {
+  renderFocus(idx);
+  renderHorizon(idx);
+  if (idx === DEFAULT_INDEX) {
+    // We're showing the default day
+    statusPill.textContent = defaultPillText();
+    statusPill.classList.remove('viewing');
+    backPill.classList.remove('shown');
+    if (tripState.status === 'today') summaryCard.classList.remove('hidden');
+    else summaryCard.classList.add('hidden');
+  } else {
+    statusPill.textContent = 'Viewing · ' + days[idx].dayShort.replace(' ✈','') + ' ' + days[idx].num + ' May';
+    statusPill.classList.add('viewing');
+    backPill.textContent = tripState.status === 'today' ? '← Back to today' : '← Back';
+    backPill.classList.add('shown');
+    summaryCard.classList.add('hidden');
+  }
+}
+function showToday() { selectDay(DEFAULT_INDEX); }
+selectDay(DEFAULT_INDEX);
+</script>
+</body>
+</html>

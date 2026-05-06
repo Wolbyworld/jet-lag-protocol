@@ -4,6 +4,16 @@ A circadian phase-shift planner for crossing time zones. Pulls your wearable dat
 
 Built from primary sleep-medicine literature. Every numeric constant in the algorithm traces back to a specific paper — Khalsa 2003 (light PRC), Burgess 2010 (0.5 mg melatonin PRC), Zeitzer 2000 (light dose-response), Burke 2015 (caffeine), Eastman & Burgess 2009 (operational protocols), Borbély 1982 (two-process sleep model), and Burgess 2014 + Kantermann 2015 (DLMO from chronotype).
 
+## What the output looks like
+
+<p align="center">
+  <img src="screenshots/sample-tue-19.png" alt="Sample plan view — focus card with actions for Tue 19 May, horizon strip below, two collapsible context disclosures (Garmin personalization and convergence trajectory) expanded" width="640">
+</p>
+
+<p align="center"><em>The sample plan, with the highest-leverage day (Tue 19 — return travel) tapped open. Top: focus card with the day's actions and rationales. Middle: 12-day horizon strip (tap any day to inspect). Bottom: collapsed-by-default disclosures expand to show your Garmin context, the DLMO convergence chart, and the methodology sources.</em></p>
+
+You can poke at a live sanitized sample at [`sample/sample-trip.html`](sample/sample-trip.html).
+
 ## What's inside
 
 A single skill — `jet-lag-protocol` — that fires whenever you mention an upcoming flight ≥3 time zones away.
@@ -58,7 +68,22 @@ Plus an explicit **parameter quarantine** section at the bottom of `algorithm-ru
 
 ## Install
 
-Drag-drop the `.plugin` file onto Cowork. The skill auto-registers. On the next session, mention an upcoming flight ≥3 time zones away and it'll trigger.
+Drag-drop the [`.plugin` file from the latest release](https://github.com/Wolbyworld/jet-lag-protocol/releases) onto Cowork. The skill auto-registers. On the next session, mention an upcoming flight ≥3 time zones away and it'll trigger.
+
+## ⚠ Not medical advice
+
+**This plugin is a behavioral and lifestyle planning tool, not a medical device or clinical decision aid.** It produces suggestions about light exposure, sleep timing, caffeine, and over-the-counter melatonin, derived from published circadian-rhythm research. The output is a starting point for a healthy adult traveler — *not* personalized medical guidance.
+
+Specifically:
+
+- **Melatonin recommendations** are based on the 0.5 mg over-the-counter dose and population-level phase response curves. They are not prescriptions, do not account for your individual response, drug interactions, or contraindications. Melatonin is regulated as a dietary supplement in the US and as a prescription medication in many other countries (UK, EU, Australia, Japan) — comply with your local rules.
+- **Caffeine recommendations** assume typical metabolism. They do not account for cardiovascular conditions, anxiety disorders, pregnancy, hormonal contraceptive use, or CYP1A2 genetic variation, all of which materially change the safe and effective dosing.
+- **Light exposure recommendations** assume normal vision and no light-triggered conditions. People with retinal disease, migraine with photophobia, bipolar disorder (where light therapy can trigger mania), or epilepsy should consult a physician before following light-timing prescriptions.
+- **Sleep schedule shifts** can interact with mood disorders, sleep disorders (DSPS, ASPS, narcolepsy, insomnia), shift-work disorder, and medications affecting alertness. The plugin does not screen for these conditions.
+
+**Consult a qualified healthcare provider before:** starting melatonin if you take any medication, are pregnant or nursing, are under 18, or have a diagnosed sleep, mood, cardiovascular, or neurological condition. The protocol is not a substitute for clinical evaluation.
+
+The author is not a physician, makes no claims of medical accuracy or efficacy for any individual, and accepts no liability for outcomes from following the plugin's recommendations. Use at your own risk.
 
 ## License
 
@@ -66,4 +91,4 @@ MIT. Use it, fork it, improve it.
 
 ## Author
 
-Alvaro Martinez Higes · `alvaro@luzia.com`
+Alvaro Martinez Higes · [`alvaro@luzia.com`](mailto:alvaro@luzia.com) · [github.com/Wolbyworld](https://github.com/Wolbyworld)
