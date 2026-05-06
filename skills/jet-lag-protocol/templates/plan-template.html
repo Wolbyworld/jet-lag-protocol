@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jet-lag plan</title>
+<style>
+  :root { --bg: #fafaf9; --card: #fff; --fg: #0f172a; --fg-soft: #475569; --fg-faint: #94a3b8;
+    --accent: #047857; --accent-soft: #d1fae5; --melatonin: #7c3aed; --strong: #f59e0b;
+    --soft: #cbd5e1; --sleep: #0f172a; --caf: #92400e; --travel: #0ea5e9; --note: #b91c1c;
+    --border: #e7e5e4; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.02em; }
+  .sub { color: var(--fg-soft); font-size: 13px; margin: 0 0 22px; }
+  .status-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; min-height: 28px; }
+  .pill { display: inline-flex; align-items: center; gap: 6px;
+    background: var(--accent); color: white; font-size: 10px; font-weight: 700;
+    letter-spacing: 0.12em; padding: 5px 10px; border-radius: 99px; text-transform: uppercase; }
+  .pill.viewing { background: var(--fg); }
+  .back-pill { display: none; align-items: center; gap: 4px; font-size: 12px; color: var(--accent);
+    background: var(--accent-soft); padding: 5px 10px; border-radius: 99px; cursor: pointer;
+    border: none; font-weight: 600; }
+  .back-pill.shown { display: inline-flex; }
+  .focus-card { background: var(--card); border: 1px solid var(--border);
+    border-radius: 18px; padding: 26px 24px; margin-bottom: 22px;
+    box-shadow: 0 4px 18px -8px rgba(15,23,42,0.1);
+    transition: opacity 0.18s ease; }
+  .focus-card.fading { opacity: 0; }
+  .focus-day { font-size: 28px; font-weight: 600; margin: 4px 0 4px; letter-spacing: -0.02em; }
+  .focus-phase { font-size: 13px; color: var(--fg-soft); margin-bottom: 22px; }
+  .focus-phase .key-tag { display: inline-block; margin-left: 8px; color: var(--strong); font-weight: 700; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .next-up { font-size: 11px; color: var(--fg-faint); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600; margin-bottom: 12px; }
+  .actions { padding: 0; margin: 0; list-style: none; }
+  .actions li { display: flex; gap: 14px; padding: 13px 0; border-top: 1px solid var(--border); align-items: center; }
+  .actions li:first-child { border-top: none; padding-top: 0; }
+  .when { font-size: 14px; font-weight: 700; color: var(--fg); min-width: 70px; }
+  .what { flex: 1; }
+  .what .h { font-size: 14px; font-weight: 500; line-height: 1.4; }
+  .what .why { font-size: 12px; color: var(--fg-soft); margin-top: 3px; line-height: 1.5; }
+  .what .star { color: var(--melatonin); font-weight: 700; }
+  .icon { width: 36px; height: 36px; border-radius: 10px; display: inline-flex;
+    align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .icon.bed { background: var(--sleep); color: white; }
+  .icon.wake { background: #fef3c7; color: var(--strong); }
+  .icon.lights { background: var(--strong); color: white; }
+  .icon.lightsoft { background: var(--soft); color: var(--fg); }
+  .icon.mel { background: var(--melatonin); color: white; }
+  .icon.caf { background: var(--caf); color: white; }
+  .icon.fly { background: var(--travel); color: white; }
+  .icon.note { background: #fee2e2; color: var(--note); }
+  details.day-why { margin-top: 18px; border-top: 1px solid var(--border); padding-top: 14px; }
+  details.day-why summary { cursor: pointer; font-size: 12px; color: var(--accent); font-weight: 600; list-style: none; letter-spacing: 0.04em; }
+  details.day-why summary::-webkit-details-marker { display: none; }
+  details.day-why summary::after { content: ' ▾'; }
+  details.day-why[open] summary::after { content: ' ▴'; }
+  details.day-why .body { font-size: 13px; color: var(--fg-soft); margin-top: 10px; line-height: 1.6; }
+  .horizon-title { font-size: 11px; color: var(--fg-faint); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600; margin: 6px 0 10px; }
+  .horizon { display: grid; gap: 5px; }
+  .h-day { background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 8px 2px 6px; text-align: center; min-height: 76px;
+    display: flex; flex-direction: column; justify-content: space-between; align-items: center;
+    cursor: pointer; transition: transform 0.12s, box-shadow 0.12s, border-color 0.12s;
+    user-select: none; -webkit-tap-highlight-color: transparent; }
+  .h-day:hover { transform: translateY(-2px); box-shadow: 0 6px 14px -6px rgba(15,23,42,0.15); }
+  .h-day.active { border-color: var(--accent); border-width: 2px; box-shadow: 0 0 0 2px var(--accent-soft); padding: 7px 1px 5px; }
+  .h-day.key { background: linear-gradient(180deg, #fef3c7 0%, #fff 60%); }
+  .h-day.today { background: linear-gradient(180deg, var(--accent-soft) 0%, #fff 70%); }
+  .h-day .h-num { font-size: 14px; font-weight: 700; }
+  .h-day .h-label { font-size: 9px; color: var(--fg-faint); text-transform: uppercase; letter-spacing: 0.04em; line-height: 1.2; }
+  .h-day .star { font-size: 9px; color: var(--strong); font-weight: 700; }
+  .h-day .dots { display: flex; justify-content: center; gap: 2px; }
+  .h-day .dots span { width: 4px; height: 4px; border-radius: 50%; background: #cbd5e1; }
+  .h-day .dots span.s { background: var(--sleep); }
+  .h-day .dots span.l { background: var(--strong); }
+  .h-day .dots span.m { background: var(--melatonin); }
+  .summary-card { margin-top: 22px; padding: 16px 18px; background: #f8fafc;
+    border: 1px solid var(--border); border-radius: 12px;
+    font-size: 13px; color: var(--fg-soft); line-height: 1.6; }
+  .summary-card strong { color: var(--fg); }
+  .summary-card.hidden { display: none; }
+  .context-stack { margin-top: 36px; }
+  details.ctx { background: transparent; border: none; padding: 0; margin-bottom: 4px; }
+  details.ctx > summary {
+    cursor: pointer; padding: 14px 4px; list-style: none;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+    transition: background 0.12s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  details.ctx > summary:hover { background: rgba(0,0,0,0.02); }
+  details.ctx > summary::-webkit-details-marker { display: none; }
+  details.ctx > summary .chev { color: var(--fg-faint); font-size: 12px; transition: transform 0.18s; min-width: 14px; }
+  details.ctx[open] > summary .chev { transform: rotate(90deg); color: var(--accent); }
+  details.ctx > summary .ctx-title { font-size: 14px; font-weight: 600; color: var(--fg); flex: 1; }
+  details.ctx > summary .ctx-meta { font-size: 11px; color: var(--fg-faint); }
+  details.ctx > .ctx-body { padding: 8px 0 22px 24px; }
+  .perso-grid { display: grid; gap: 10px; grid-template-columns: repeat(2, 1fr); margin-bottom: 14px; }
+  @media (min-width: 600px) { .perso-grid { grid-template-columns: repeat(4, 1fr); } }
+  .perso-stat { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+  .perso-stat .num { font-size: 16px; font-weight: 600; }
+  .perso-stat .label { font-size: 10px; color: var(--fg-soft); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+  .perso-stat .read { font-size: 11px; color: var(--fg-soft); margin-top: 6px; line-height: 1.45; }
+  .perso-stat.ok { border-left: 3px solid var(--accent); }
+  .perso-stat.flag { border-left: 3px solid var(--strong); }
+  .perso-adj { border-left: 3px solid var(--melatonin); padding: 10px 14px;
+    background: #faf5ff; border-radius: 0 10px 10px 0; margin-bottom: 8px; }
+  .perso-adj .head { font-weight: 600; font-size: 13px; color: var(--accent); margin-bottom: 4px; }
+  .perso-adj .body { font-size: 12px; color: var(--fg-soft); line-height: 1.5; }
+  .moment { display: flex; gap: 12px; padding: 10px 0; border-top: 1px solid var(--border); align-items: flex-start; }
+  .moment:first-child { border-top: none; padding-top: 0; }
+  .moment .num { width: 24px; height: 24px; border-radius: 50%; background: var(--melatonin); color: white;
+    font-weight: 700; font-size: 11px; line-height: 24px; text-align: center; flex-shrink: 0; }
+  .moment .when-l { font-size: 11px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; }
+  .moment .what-l { font-size: 14px; font-weight: 500; margin: 2px 0 4px; }
+  .moment .why-l { font-size: 12px; color: var(--fg-soft); line-height: 1.5; }
+  .moment .text { flex: 1; }
+  .prose { max-width: 60ch; }
+  .prose p { font-size: 13px; line-height: 1.6; color: var(--fg-soft); margin: 0 0 12px 0; }
+  .prose strong { color: var(--fg); font-weight: 600; }
+  .refs { font-size: 12px; color: var(--fg-faint); margin-top: 14px; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<!-- ============== TRIP DATA — REPLACE THIS BLOCK PER TRIP ============== -->
+<!-- Edit window.tripData below to customize. The renderer at the bottom builds the page from this object. -->
+<script id="trip-data">
+window.tripData = {
+  trip: {
+    title: "Jet-lag plan",
+    sub: "Edit window.tripData and reload to see your trip"
+  },
+  days: [
+    // { date: "YYYY-MM-DD", num: 10, dayShort: "Sun", phaseLabel: "D−2", title: "Sun, 10 May",
+    //   phaseFull: "Pre-flight · day 1", isKey: false, dots: ["s","l",""],
+    //   actions: [{type:"wake|bed|lights|lightsoft|mel|caf|fly|note", time:"06:30", h:"...", why:"...", star:false}],
+    //   why: "optional explanation of why this day matters" }
+  ],
+  todaySummary: "Today's job: ... · Hardest day coming: ...",
+  garmin: null,  // { stats: [{num,label,read,kind:"ok"|"flag"}], adjustments: [{head, body}] }
+  leverage: [
+    // { num, when, what, why }
+  ],
+  methodology: {
+    paragraphs: [
+      "This plan was generated by a circadian phase-shift algorithm that applies eleven rules grounded in primary sleep-medicine literature. Every numerical constant traces back to a specific study.",
+      "<strong>Westward delays are easier than eastward advances.</strong> Human τ ≈ 24.2 h. With full intervention you can shift ~1.5 h/day west, ~1.0 h/day east.",
+      "<strong>Light is more powerful than melatonin.</strong> Properly-timed bright outdoor light shifts the clock 2–3× more than 0.5 mg melatonin per dose."
+    ],
+    sources: "Khalsa et al. 2003 (light PRC) · Burgess et al. 2010 (0.5 mg melatonin PRC) · Zeitzer et al. 2000 (light dose-response) · Burke et al. 2015 (caffeine pharmacology) · Eastman & Burgess 2009 (operational protocols) · Borbély 1982 (two-process sleep model) · Burgess 2014 + Kantermann 2015 (DLMO from chronotype)."
+  }
+};
+</script>
+<!-- ============== END TRIP DATA ============== -->
+
+<div class="wrap">
+  <h1 id="page-title">Jet-lag plan</h1>
+  <p class="sub" id="page-sub"></p>
+
+  <div class="status-row">
+    <span class="pill" id="status-pill">…</span>
+    <button class="back-pill" id="back-pill" type="button">← Back</button>
+  </div>
+
+  <div class="focus-card" id="focus-card"></div>
+
+  <div class="horizon-title" id="horizon-title">Tap a day</div>
+  <div class="horizon" id="horizon"></div>
+
+  <div class="summary-card" id="summary-card"></div>
+
+  <div class="context-stack" id="context-stack"></div>
+</div>
+
+<script>
+(function() {
+  const data = window.tripData;
+  if (!data || !data.days || !data.days.length) {
+    document.getElementById('focus-card').innerHTML = '<div style="padding:40px;text-align:center;color:#94a3b8">No trip data — edit window.tripData in the &lt;script id="trip-data"&gt; block above.</div>';
+    return;
+  }
+
+  // Title + sub
+  if (data.trip) {
+    document.getElementById('page-title').textContent = data.trip.title || 'Jet-lag plan';
+    document.getElementById('page-sub').textContent = data.trip.sub || '';
+  }
+
+  const days = data.days;
+  const iconMap = { bed: "🌙", wake: "↑", lights: "☀", lightsoft: "◐", mel: "●", caf: "☕", fly: "✈", note: "!" };
+
+  const focusCard = document.getElementById('focus-card');
+  const horizon = document.getElementById('horizon');
+  const statusPill = document.getElementById('status-pill');
+  const backPill = document.getElementById('back-pill');
+  const summaryCard = document.getElementById('summary-card');
+
+  // Horizon column count = days.length (capped responsively via CSS below)
+  horizon.style.gridTemplateColumns = `repeat(${days.length}, 1fr)`;
+
+  function computeTripState() {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const todayMs = today.getTime();
+    for (let i = 0; i < days.length; i++) {
+      if (!days[i].date) continue;
+      const d = new Date(days[i].date); d.setHours(0,0,0,0);
+      if (d.getTime() === todayMs) return { idx: i, status: 'today' };
+    }
+    if (!days[0].date) return { idx: 0, status: 'unknown' };
+    const firstMs = new Date(days[0].date).setHours(0,0,0,0);
+    const lastMs = new Date(days[days.length-1].date).setHours(0,0,0,0);
+    if (todayMs < firstMs) return { idx: 0, status: 'before', daysUntil: Math.round((firstMs-todayMs)/86400000) };
+    return { idx: days.length-1, status: 'after', daysAgo: Math.round((todayMs-lastMs)/86400000) };
+  }
+  const tripState = computeTripState();
+  const DEFAULT_INDEX = tripState.idx;
+  const TODAY_INDEX = tripState.status === 'today' ? tripState.idx : -1;
+
+  function defaultPillText() {
+    if (tripState.status === 'today') return 'Today · ' + (days[tripState.idx].phaseLabel ? days[tripState.idx].phaseLabel.split('·')[0].trim() : 'Day ' + (tripState.idx+1));
+    if (tripState.status === 'before') { const n = tripState.daysUntil; return 'Trip starts in ' + n + ' day' + (n===1?'':'s'); }
+    if (tripState.status === 'after')  { const n = tripState.daysAgo;  return 'Trip ended ' + n + ' day' + (n===1?'':'s') + ' ago'; }
+    return 'Plan';
+  }
+
+  function renderFocus(idx) {
+    const d = days[idx];
+    if (!d) return;
+    let html = `<div class="focus-day">${d.title || ''}</div>`;
+    html += `<div class="focus-phase">${d.phaseFull || ''}${d.isKey ? '<span class="key-tag">★ Key day</span>' : ''}</div>`;
+    html += `<div class="next-up">${idx === TODAY_INDEX ? "Next actions" : "Actions for this day"}</div>`;
+    html += `<ul class="actions">`;
+    (d.actions || []).forEach(a => {
+      const star = a.star ? '<span class="star">★ </span>' : '';
+      html += `<li><div class="icon ${a.type}">${iconMap[a.type] || '·'}</div><div class="when">${a.time||''}</div><div class="what"><div class="h">${star}${a.h||''}</div>${a.why ? `<div class="why">${a.why}</div>` : ''}</div></li>`;
+    });
+    html += `</ul>`;
+    if (d.why) html += `<details class="day-why"><summary>Why this day matters</summary><div class="body">${d.why}</div></details>`;
+    focusCard.classList.add('fading');
+    setTimeout(() => { focusCard.innerHTML = html; focusCard.classList.remove('fading'); }, 120);
+  }
+
+  function renderHorizon(activeIdx) {
+    horizon.innerHTML = '';
+    days.forEach((d, i) => {
+      const cls = ['h-day'];
+      if (i === activeIdx) cls.push('active');
+      if (i === TODAY_INDEX && activeIdx !== TODAY_INDEX) cls.push('today');
+      if (d.isKey) cls.push('key');
+      const star = d.isKey ? '<span class="star">★</span>' : '';
+      const dots = (d.dots || ['','','']).map(c => `<span${c ? ` class="${c}"` : ''}></span>`).join('');
+      const div = document.createElement('div');
+      div.className = cls.join(' ');
+      div.innerHTML = `<div class="h-num">${d.num || ''}</div><div class="h-label">${d.dayShort || ''}</div>${star}<div class="dots">${dots}</div>`;
+      div.addEventListener('click', () => selectDay(i));
+      horizon.appendChild(div);
+    });
+  }
+
+  function selectDay(idx) {
+    renderFocus(idx);
+    renderHorizon(idx);
+    if (idx === DEFAULT_INDEX) {
+      statusPill.textContent = defaultPillText();
+      statusPill.classList.remove('viewing');
+      backPill.classList.remove('shown');
+      if (tripState.status === 'today' && data.todaySummary) {
+        summaryCard.innerHTML = data.todaySummary;
+        summaryCard.classList.remove('hidden');
+      } else {
+        summaryCard.classList.add('hidden');
+      }
+    } else {
+      const d = days[idx];
+      const dayLabel = (d.dayShort || '').replace(' ✈','') + ' ' + (d.num || '');
+      statusPill.textContent = 'Viewing · ' + dayLabel;
+      statusPill.classList.add('viewing');
+      backPill.textContent = tripState.status === 'today' ? '← Back to today' : '← Back';
+      backPill.classList.add('shown');
+      summaryCard.classList.add('hidden');
+    }
+  }
+  backPill.addEventListener('click', () => selectDay(DEFAULT_INDEX));
+
+  // === Context (collapsible sections) ===
+  function renderContext() {
+    const stack = document.getElementById('context-stack');
+    let html = '';
+    if (data.garmin && data.garmin.stats && data.garmin.stats.length) {
+      html += '<details class="ctx"><summary><span class="chev">▸</span><span class="ctx-title">Personalized for you</span><span class="ctx-meta">Wearable · last 7 days</span></summary><div class="ctx-body">';
+      html += '<div class="perso-grid">';
+      data.garmin.stats.forEach(s => {
+        html += `<div class="perso-stat ${s.kind || 'ok'}"><div class="num">${s.num}</div><div class="label">${s.label}</div><div class="read">${s.read || ''}</div></div>`;
+      });
+      html += '</div>';
+      (data.garmin.adjustments || []).forEach(a => {
+        html += `<div class="perso-adj"><div class="head">${a.head}</div><div class="body">${a.body}</div></div>`;
+      });
+      html += '</div></details>';
+    }
+    if (data.leverage && data.leverage.length) {
+      html += '<details class="ctx"><summary><span class="chev">▸</span><span class="ctx-title">High-leverage moments</span><span class="ctx-meta">' + data.leverage.length + ' decisions that determine the trip</span></summary><div class="ctx-body">';
+      data.leverage.forEach(m => {
+        html += `<div class="moment"><div class="num">${m.num}</div><div class="text"><div class="when-l">${m.when}</div><div class="what-l">${m.what}</div><div class="why-l">${m.why}</div></div></div>`;
+      });
+      html += '</div></details>';
+    }
+    if (data.methodology && (data.methodology.paragraphs || data.methodology.sources)) {
+      html += '<details class="ctx"><summary><span class="chev">▸</span><span class="ctx-title">Methodology &amp; sources</span><span class="ctx-meta">Every constant traces to a paper</span></summary><div class="ctx-body"><div class="prose">';
+      (data.methodology.paragraphs || []).forEach(p => { html += `<p>${p}</p>`; });
+      html += '</div>';
+      if (data.methodology.sources) html += `<div class="refs"><strong style="color:var(--fg);">Primary literature:</strong> ${data.methodology.sources}</div>`;
+      html += '</div></details>';
+    }
+    stack.innerHTML = html;
+  }
+
+  renderContext();
+  selectDay(DEFAULT_INDEX);
+})();
+</script>
+</body>
+</html>

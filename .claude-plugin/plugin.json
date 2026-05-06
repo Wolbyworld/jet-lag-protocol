@@ -1,0 +1,22 @@
+{
+  "name": "jet-lag-protocol",
+  "version": "0.1.0",
+  "description": "Two-pass circadian phase-shift planner for an upcoming flight. Pulls wearable data, runs a four-question consultation, and generates a personalized day-by-day light/sleep/melatonin/caffeine plan plus an interactive HTML chart. Built from primary sleep-medicine literature; every numeric constant traces back to a specific paper.",
+  "author": {
+    "name": "Alvaro Martinez Higes",
+    "email": "alvaro@luzia.com"
+  },
+  "homepage": "https://github.com/alvaromartinezhiges/jet-lag-protocol",
+  "repository": "https://github.com/alvaromartinezhiges/jet-lag-protocol",
+  "license": "MIT",
+  "keywords": [
+    "jet-lag",
+    "circadian",
+    "sleep",
+    "travel",
+    "melatonin",
+    "chronotherapy",
+    "phase-shift",
+    "wearable"
+  ]
+}
