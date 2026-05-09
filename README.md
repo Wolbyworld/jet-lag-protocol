@@ -2,7 +2,11 @@
 
 A circadian phase-shift planner for crossing time zones. Pulls your wearable data, asks four targeted questions about the trip, and generates a personalized day-by-day plan plus an interactive HTML chart.
 
-Built from primary sleep-medicine literature. Every numeric constant in the algorithm traces back to a specific paper — Khalsa 2003 (light PRC), Burgess 2010 (0.5 mg melatonin PRC), Zeitzer 2000 (light dose-response), Burke 2015 (caffeine), Eastman & Burgess 2009 (operational protocols), Borbély 1982 (two-process sleep model), and Burgess 2014 + Kantermann 2015 (DLMO from chronotype).
+Built from primary sleep-medicine literature. Every numeric constant in the algorithm traces back to a specific paper.
+
+**Foundational** (the framework): Khalsa 2003 (light PRC) · Burgess 2010 (0.5 mg melatonin PRC) · Burke 2015 (caffeine) · Borbély 1982 (two-process sleep model) · Burgess 2014 + Kantermann 2015 (DLMO from chronotype) · St Hilaire 2012 (1 h light pulse PRC) · Burgess 2008 (3 mg melatonin PRC) · Zeitzer 2000 (light dose-response).
+
+**Current standard** (post-2015 updates): **Brown et al. 2022** (melanopic EDI light prescription — replaces lux as the field metric) · **Phillips et al. 2019** (individual variability in light sensitivity — 50× spread) · **Roach & Sargent 2019** (current synthesis review of jet-lag interventions, replaces Eastman & Burgess 2009 as primary operational reference) · **Chinoy et al. 2021** (consumer-wearable validation — drives R10's relative-baseline approach).
 
 ## What the output looks like
 

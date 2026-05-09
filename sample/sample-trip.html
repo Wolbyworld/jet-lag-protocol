@@ -2,498 +2,1336 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SF jet-lag plan</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F4ECD8">
+<title>Jet-lag plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,500&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root { --bg: #fafaf9; --card: #fff; --fg: #0f172a; --fg-soft: #475569; --fg-faint: #94a3b8;
-    --accent: #047857; --accent-soft: #d1fae5; --melatonin: #7c3aed; --strong: #f59e0b;
-    --soft: #cbd5e1; --sleep: #0f172a; --caf: #92400e; --travel: #0ea5e9; --note: #b91c1c;
-    --border: #e7e5e4; }
-  * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--fg);
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', system-ui, sans-serif;
-    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-  .wrap { max-width: 720px; margin: 0 auto; padding: 32px 16px 80px; }
-  .topnav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-  .back { color: var(--fg-soft); text-decoration: none; font-size: 13px; }
-  .label { font-size: 11px; font-weight: 600; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; }
-  h1 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.02em; }
-  .sub { color: var(--fg-soft); font-size: 13px; margin: 0 0 22px; }
-
-  /* Status pill row */
-  .status-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; min-height: 28px; }
-  .pill { display: inline-flex; align-items: center; gap: 6px;
-    background: var(--accent); color: white; font-size: 10px; font-weight: 700;
-    letter-spacing: 0.12em; padding: 5px 10px; border-radius: 99px; text-transform: uppercase; }
-  .pill.viewing { background: var(--fg); }
-  .back-pill { display: none; align-items: center; gap: 4px; font-size: 12px; color: var(--accent);
-    background: var(--accent-soft); padding: 5px 10px; border-radius: 99px; cursor: pointer;
-    border: none; font-weight: 600; }
-  .back-pill.shown { display: inline-flex; }
-
-  /* Focus card */
-  .focus-card { background: var(--card); border: 1px solid var(--border);
-    border-radius: 18px; padding: 26px 24px; margin-bottom: 22px;
-    box-shadow: 0 4px 18px -8px rgba(15,23,42,0.1);
-    transition: opacity 0.18s ease; }
-  .focus-card.fading { opacity: 0; }
-  .focus-day { font-size: 28px; font-weight: 600; margin: 4px 0 4px; letter-spacing: -0.02em; }
-  .focus-phase { font-size: 13px; color: var(--fg-soft); margin-bottom: 22px; }
-  .focus-phase .key-tag { display: inline-block; margin-left: 8px; color: var(--strong); font-weight: 700; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
-
-  .next-up { font-size: 11px; color: var(--fg-faint); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600; margin-bottom: 12px; }
-  .actions { padding: 0; margin: 0; list-style: none; }
-  .actions li { display: flex; gap: 14px; padding: 13px 0; border-top: 1px solid var(--border); align-items: center; }
-  .actions li:first-child { border-top: none; padding-top: 0; }
-  .when { font-size: 14px; font-weight: 700; color: var(--fg); min-width: 70px; }
-  .what { flex: 1; }
-  .what .h { font-size: 14px; font-weight: 500; line-height: 1.4; }
-  .what .why { font-size: 12px; color: var(--fg-soft); margin-top: 3px; line-height: 1.5; }
-  .what .star { color: var(--melatonin); font-weight: 700; }
-  .icon { width: 36px; height: 36px; border-radius: 10px; display: inline-flex;
-    align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
-  .icon.bed { background: var(--sleep); color: white; }
-  .icon.wake { background: #fef3c7; color: var(--strong); }
-  .icon.lights { background: var(--strong); color: white; }
-  .icon.lightsoft { background: var(--soft); color: var(--fg); }
-  .icon.mel { background: var(--melatonin); color: white; }
-  .icon.caf { background: var(--caf); color: white; }
-  .icon.fly { background: var(--travel); color: white; }
-  .icon.note { background: #fee2e2; color: var(--note); }
-
-  /* Why-this-day expandable inside focus card */
-  details.day-why { margin-top: 18px; border-top: 1px solid var(--border); padding-top: 14px; }
-  details.day-why summary { cursor: pointer; font-size: 12px; color: var(--accent); font-weight: 600; list-style: none; letter-spacing: 0.04em; }
-  details.day-why summary::-webkit-details-marker { display: none; }
-  details.day-why summary::after { content: ' ▾'; }
-  details.day-why[open] summary::after { content: ' ▴'; }
-  details.day-why .body { font-size: 13px; color: var(--fg-soft); margin-top: 10px; line-height: 1.6; }
-
-  /* Horizon strip */
-  .horizon-title { font-size: 11px; color: var(--fg-faint); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600; margin: 6px 0 10px; }
-  .horizon { display: grid; grid-template-columns: repeat(12, 1fr); gap: 5px; }
-  .h-day { background: var(--card); border: 1px solid var(--border); border-radius: 10px;
-    padding: 8px 2px 6px; text-align: center; min-height: 76px;
-    display: flex; flex-direction: column; justify-content: space-between; align-items: center;
-    cursor: pointer; transition: transform 0.12s, box-shadow 0.12s, border-color 0.12s;
-    user-select: none; -webkit-tap-highlight-color: transparent; }
-  .h-day:hover { transform: translateY(-2px); box-shadow: 0 6px 14px -6px rgba(15,23,42,0.15); }
-  .h-day.active { border-color: var(--accent); border-width: 2px; box-shadow: 0 0 0 2px var(--accent-soft); padding: 7px 1px 5px; }
-  .h-day.key { background: linear-gradient(180deg, #fef3c7 0%, #fff 60%); }
-  .h-day.today { background: linear-gradient(180deg, var(--accent-soft) 0%, #fff 70%); }
-  .h-day .h-num { font-size: 14px; font-weight: 700; }
-  .h-day .h-label { font-size: 9px; color: var(--fg-faint); text-transform: uppercase; letter-spacing: 0.04em; line-height: 1.2; }
-  .h-day .star { font-size: 9px; color: var(--strong); font-weight: 700; }
-  .h-day .dots { display: flex; justify-content: center; gap: 2px; }
-  .h-day .dots span { width: 4px; height: 4px; border-radius: 50%; background: #cbd5e1; }
-  .h-day .dots span.s { background: var(--sleep); }
-  .h-day .dots span.l { background: var(--strong); }
-  .h-day .dots span.m { background: var(--melatonin); }
-
-  .summary-card { margin-top: 22px; padding: 16px 18px; background: #f8fafc;
-    border: 1px solid var(--border); border-radius: 12px;
-    font-size: 13px; color: var(--fg-soft); line-height: 1.6; }
-  .summary-card strong { color: var(--fg); }
-  .summary-card.hidden { display: none; }
-
-  /* Collapsible context sections — minimalist, subtle */
-  .context-stack { margin-top: 36px; }
-  details.ctx { background: transparent; border: none; padding: 0; margin-bottom: 4px; }
-  details.ctx > summary {
-    cursor: pointer; padding: 14px 4px; list-style: none;
-    border-top: 1px solid var(--border);
-    display: flex; align-items: center; gap: 10px;
-    transition: background 0.12s;
-    -webkit-tap-highlight-color: transparent;
+  /*
+   * Two themes, toggled via a small floating pill.
+   *   A = Editorial Almanac (paper, ink, vermillion · Source Serif + Inter Tight + JetBrains Mono)
+   *   D = Calm Spa Ritual    (sage, rose · Fraunces + Inter Tight, lowercase microcopy)
+   * The whole React tree re-renders on theme change. Choice persists in localStorage.
+   */
+  html, body {
+    margin: 0; padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-size-adjust: 100%;
+    overscroll-behavior-y: none;
   }
-  details.ctx > summary:hover { background: rgba(0,0,0,0.02); }
-  details.ctx > summary::-webkit-details-marker { display: none; }
-  details.ctx > summary .chev { color: var(--fg-faint); font-size: 12px; transition: transform 0.18s; min-width: 14px; }
-  details.ctx[open] > summary .chev { transform: rotate(90deg); color: var(--accent); }
-  details.ctx > summary .ctx-title { font-size: 14px; font-weight: 600; color: var(--fg); flex: 1; }
-  details.ctx > summary .ctx-meta { font-size: 11px; color: var(--fg-faint); }
-  details.ctx > .ctx-body { padding: 8px 0 22px 24px; }
-
-  /* Inside-context content */
-  .perso-grid { display: grid; gap: 10px; grid-template-columns: repeat(2, 1fr); margin-bottom: 14px; }
-  @media (min-width: 600px) { .perso-grid { grid-template-columns: repeat(4, 1fr); } }
-  .perso-stat { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
-  .perso-stat .num { font-size: 16px; font-weight: 600; }
-  .perso-stat .label { font-size: 10px; color: var(--fg-soft); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
-  .perso-stat .read { font-size: 11px; color: var(--fg-soft); margin-top: 6px; line-height: 1.45; }
-  .perso-stat.ok { border-left: 3px solid var(--accent); }
-  .perso-stat.flag { border-left: 3px solid var(--strong); }
-  .perso-adj { border-left: 3px solid var(--melatonin); padding: 10px 14px;
-    background: #faf5ff; border-radius: 0 10px 10px 0; margin-bottom: 8px; }
-  .perso-adj .head { font-weight: 600; font-size: 13px; color: var(--accent); margin-bottom: 4px; }
-  .perso-adj .body { font-size: 12px; color: var(--fg-soft); line-height: 1.5; }
-
-  .traj-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 12px; }
-  .traj-wrap svg { display: block; min-width: 720px; max-width: 100%; height: auto; }
-  .caption { font-size: 12px; color: var(--fg-soft); line-height: 1.55; }
-
-  .moment { display: flex; gap: 12px; padding: 10px 0; border-top: 1px solid var(--border); align-items: flex-start; }
-  .moment:first-child { border-top: none; padding-top: 0; }
-  .moment .num { width: 24px; height: 24px; border-radius: 50%; background: var(--melatonin); color: white;
-    font-weight: 700; font-size: 11px; line-height: 24px; text-align: center; flex-shrink: 0; }
-  .moment .when { font-size: 11px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; }
-  .moment .what-l { font-size: 14px; font-weight: 500; margin: 2px 0 4px; }
-  .moment .why-l { font-size: 12px; color: var(--fg-soft); line-height: 1.5; }
-  .moment .text { flex: 1; }
-
-  .prose { max-width: 60ch; }
-  .prose p { font-size: 13px; line-height: 1.6; color: var(--fg-soft); margin: 0 0 12px 0; }
-  .prose strong { color: var(--fg); font-weight: 600; }
-  .refs { font-size: 12px; color: var(--fg-faint); margin-top: 14px; line-height: 1.6; }
-
-  @media (max-width: 540px) {
-    .horizon { grid-template-columns: repeat(6, 1fr); }
-    .horizon .h-day:nth-child(n+13) { display: none; }
+  body { min-height: 100vh; background: #1d1a16; }
+  * { box-sizing: border-box; }
+  #root {
+    width: 100%;
+    max-width: 460px;
+    margin: 0 auto;
+    min-height: 100vh;
+    position: relative;
+  }
+  @media (min-width: 720px) {
+    #root { box-shadow: 0 30px 80px -30px rgba(0,0,0,0.35); }
+  }
+  .booting {
+    padding: 28vh 24px; text-align: center;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11px; letter-spacing: 0.2em; color: #9a9082;
+    background: #F4ECD8; min-height: 100vh;
   }
 </style>
+
+<!--
+  ─────────────────────────────────────────────────────────────────────────────
+  TRIP DATA — replaced by the jet-lag-protocol skill on every plan generation.
+  Replace the contents of <script id="trip-data"> below; do not touch any other
+  block. The renderer reads window.TRIP and lays out both themes.
+
+  Shape (see SKILL.md for the canonical reference):
+    meta:    { route, routeLong, delta, deltaLong, window, today:{i,dow,n,mon,year,label},
+               nowLabel, nowHHMM, next:{actionId,time,label,inMin},
+               traveler, planId, generatedAt, theme? }   // theme: "A" | "D" (optional default)
+    morning: { kicker, headline, body, deltas:[{k,v,note}] }   // optional, today only, A only
+    days[]:  { i, date:"YYYY-MM-DD", dow, n, mon, label, tag, short,
+               kind, isKey, travel, isToday?, summary, actions:[Action] }
+    Action:  { id, t, k:wake|light|lightoff|caffeine|melatonin|sleep|travel,
+               h, why?, deep?:{kicker,deck,body[],cite[]}, key?, next?, done? }
+    notebook:{ masthead:{kicker,title,titleItalic,deck},
+               metadata:[{k,v}], chartCaption?, garmin:[{metric,reading,read}],
+               chartPoints:[{i,y,label,note,isKey?,deep?}],
+               methodology:[string], refs:[string] }
+  ─────────────────────────────────────────────────────────────────────────────
+-->
+<script id="trip-data">
+window.TRIP = {
+  meta: {
+    route: "SFO → MAD",
+    routeLong: "San Francisco ↔ Madrid",
+    delta: "Δ 9 h",
+    deltaLong: "9 h advance, then 9 h delay",
+    window: "12 → 22 May 2026",
+    today: { i: 9, dow: "TUE", n: 19, mon: "MAY", year: 2026, label: "TUE 19 MAY" },
+    nowLabel: "10:13 PT",
+    nowHHMM: "10:13",
+    next: { actionId: "tue19-2", time: "11:00 PT", label: "Last coffee", inMin: 47 },
+    traveler: "C. Almeida · 32M",
+    planId: "SFO·MAY26·001",
+    generatedAt: "19 May 04:31 PT"
+  },
+  morning: {
+    kicker: "MORNING UPDATE · 04:32 PT",
+    headline: "Plan held overnight. One adjustment for today.",
+    body: "Your HRV ticked up 6 ms vs. yesterday — recovery is on schedule. Tonight's in-flight melatonin moves 15 minutes earlier (18:30 → 18:15) because your DLMO drifted slightly forward.",
+    deltas: [
+      { k: "HRV (rMSSD)", v: "+6 ms", note: "well within band" },
+      { k: "Melatonin time", v: "18:30 → 18:30", note: "no change" },
+      { k: "Caffeine cutoff", v: "11:00 PT", note: "locked" }
+    ]
+  },
+  days: [
+    { i: 0, date: "2026-05-10", dow: "Sun", n: 10, mon: "MAY", label: "Sun 10 May",
+      tag: "PRE-FLIGHT · D−2", short: "drift later", kind: "pre", isKey: false, travel: false,
+      summary: "Soft start. Drift bedtime ~30 min later than usual.",
+      actions: [
+        { t: "08:30 PT", k: "wake", h: "Wake naturally — no alarm." },
+        { t: "20:00 PT", k: "lightoff", h: "Dim screens at sunset." },
+        { t: "00:00 PT", k: "sleep", h: "Bed by midnight." }
+      ]
+    },
+    { i: 1, date: "2026-05-11", dow: "Mon", n: 11, mon: "MAY", label: "Mon 11 May",
+      tag: "SLEEP-BANK · D−1", short: "sleep bank", kind: "pre", isKey: true, travel: false,
+      summary: "Bank an hour. Tomorrow's flight is long.",
+      actions: [
+        { t: "09:00 PT", k: "wake", h: "Wake. Easy morning." },
+        { t: "16:00 PT", k: "caffeine", h: "Last coffee — early today.", why: "Tomorrow's redeye demands a hard cutoff. We start the wind-down a day early." },
+        { t: "21:30 PT", k: "lightoff", h: "Sunglasses, dim the apartment." },
+        { t: "22:30 PT", k: "sleep", h: "Bed early. Sleep-bank night.", why: "An extra hour now is sleep you can spend in the air tomorrow without paying interest." }
+      ]
+    },
+    { i: 2, date: "2026-05-12", dow: "Tue", n: 12, mon: "MAY", label: "Tue 12 May",
+      tag: "OUTBOUND · D+0", short: "MAD → SFO", kind: "travel", isKey: true, travel: true,
+      summary: "Westbound flight. You will land into yesterday.",
+      actions: [
+        { t: "07:00 CEST", k: "wake", h: "Wake. Bright Madrid light immediately." },
+        { t: "10:30 CEST", k: "caffeine", h: "Coffee window opens — go." },
+        { t: "13:25 CEST", k: "travel", h: "MAD → SFO departs." },
+        { t: "16:00 CEST", k: "light", h: "Cabin: keep window blind UP. Stay awake.", why: "Going west, the rule is light = late. You want your clock pushed later, not earlier — fight the nap." },
+        { t: "22:30 PT", k: "sleep", h: "Bed in San Francisco." }
+      ]
+    },
+    { i: 3, date: "2026-05-13", dow: "Wed", n: 13, mon: "MAY", label: "Wed 13 May",
+      tag: "SF · D+1", short: "biggest shift", kind: "sf", isKey: false, travel: false,
+      summary: "Largest single-day phase shift of the trip. Mornings will hurt; light fixes it.",
+      actions: [
+        { t: "07:00 PT", k: "wake", h: "Wake. Bright outdoor light within 30 min." },
+        { t: "11:00 PT", k: "caffeine", h: "Coffee — but only one." },
+        { t: "14:00 PT", k: "light", h: "Get outside. Walk for 20 minutes." },
+        { t: "20:00 PT", k: "lightoff", h: "Dim screens." },
+        { t: "23:00 PT", k: "sleep", h: "Bed. Eye mask if you need it." }
+      ]
+    },
+    { i: 4, date: "2026-05-14", dow: "Thu", n: 14, mon: "MAY", label: "Thu 14 May",
+      tag: "SF · D+2", short: "easier", kind: "sf", isKey: false, travel: false,
+      summary: "Convergence steepens. Today should feel measurably easier.",
+      actions: [
+        { t: "07:30 PT", k: "wake", h: "Wake. Morning light." },
+        { t: "11:30 PT", k: "caffeine", h: "Coffee." },
+        { t: "23:00 PT", k: "sleep", h: "Bed." }
+      ]
+    },
+    { i: 5, date: "2026-05-15", dow: "Fri", n: 15, mon: "MAY", label: "Fri 15 May",
+      tag: "SF · D+3", short: "near-adapted", kind: "sf", isKey: false, travel: false,
+      summary: "Within an hour of SF target. Free to operate normally.",
+      actions: [
+        { t: "07:30 PT", k: "wake", h: "Wake." },
+        { t: "23:00 PT", k: "sleep", h: "Bed." }
+      ]
+    },
+    { i: 6, date: "2026-05-16", dow: "Sat", n: 16, mon: "MAY", label: "Sat 16 May",
+      tag: "SF · D+4", short: "free day", kind: "sf", isKey: false, travel: false,
+      summary: "Adapted. No constraints today.",
+      actions: [
+        { t: "—", k: "wake", h: "Sleep in if you want. You earned it." }
+      ]
+    },
+    { i: 7, date: "2026-05-17", dow: "Sun", n: 17, mon: "MAY", label: "Sun 17 May",
+      tag: "PRE-RETURN · D−2", short: "advance prep", kind: "pre", isKey: false, travel: false,
+      summary: "Begin the advance push. Earlier wake, earlier melatonin.",
+      actions: [
+        { t: "06:30 PT", k: "wake", h: "Wake earlier. Bright light." },
+        { t: "10:00 PT", k: "caffeine", h: "Last coffee." },
+        { t: "21:30 PT", k: "lightoff", h: "Dim everything." },
+        { t: "22:00 PT", k: "sleep", h: "Bed." }
+      ]
+    },
+    { i: 8, date: "2026-05-18", dow: "Mon", n: 18, mon: "MAY", label: "Mon 18 May",
+      tag: "PRE-RETURN · D−1", short: "summit", kind: "pre", isKey: false, travel: false,
+      summary: "The summit before tomorrow's return.",
+      actions: [
+        { t: "06:00 PT", k: "wake", h: "Wake. Bright light." },
+        { t: "09:30 PT", k: "caffeine", h: "Last coffee." },
+        { t: "20:30 PT", k: "lightoff", h: "Sunglasses. Dim screens." },
+        { t: "21:30 PT", k: "sleep", h: "Bed." }
+      ]
+    },
+    { i: 9, date: "2026-05-19", dow: "Tue", n: 19, mon: "MAY", label: "Tue 19 May",
+      tag: "RETURN · D+0", short: "SFO → MAD", kind: "travel", isKey: true, travel: true, isToday: true,
+      summary: "Eastbound return. The day's instruments: a 0.5 mg melatonin at 18:30 PT and a covered MAD-night of sleep on the plane.",
+      actions: [
+        { id: "tue19-1", t: "04:30 PT", k: "wake", h: "Wake. Bright light immediately.", why: "Wake-time anchor. Light at the start of subjective day caps the prior night and begins the phase advance push.", done: true },
+        { id: "tue19-2", t: "11:00 PT", k: "caffeine", h: "Last coffee — locked.", why: "Eight hours before the in-flight melatonin window. Caffeine after this delays sleep onset on the plane and weakens the melatonin dose.", next: true },
+        { id: "tue19-3", t: "14:00 PT", k: "lightoff", h: "Sunglasses on. Screens dim until takeoff.", why: "Suppresses late-afternoon light, which would push the clock LATER — the wrong direction for an eastbound (advance) trip." },
+        { id: "tue19-4", t: "17:45 PT", k: "travel", h: "SFO → MAD departs." },
+        { id: "tue19-5", t: "18:30 PT", k: "melatonin",
+          h: "0.5 mg melatonin shortly after takeoff.",
+          why: "Three hours before your SF-adapted DLMO — the peak-advance point of the Burgess 2010 phase response curve. Doubles as a sleep aid.",
+          key: true,
+          deep: {
+            kicker: "KEY ACTION · 18:30 PT",
+            deck: "Why exactly half a milligram, exactly now.",
+            body: [
+              "The 0.5 mg dose is small on purpose. Above ~1 mg, melatonin spills past the receptor saturation point and the phase-shift effect plateaus; the soporific effect rises but the circadian effect doesn't.",
+              "Timing is the lever. Burgess 2010 mapped a Phase Response Curve for 0.5 mg in healthy adults: maximum advance at roughly DLMO − 3 h. Your DLMO right now is SF-adapted (~21:30 PT), so the window opens at 18:30 PT and stays open ~90 minutes.",
+              "On a westbound flight you would skip this — light at the wrong hour does more than melatonin can fix. On an eastbound return like this one, melatonin and the in-flight sleep act together: the dose nudges the clock, the sleep covers Madrid 04 – 11 (your target night)."
+            ],
+            cite: ["Burgess HJ et al., 2010 — J Biol Rhythms 25:402", "Eastman & Burgess, 2009 — Sleep Med Rev"]
+          }
+        },
+        { id: "tue19-6", t: "18:45 PT", k: "sleep", h: "Sleep on the plane (~7 h).", why: "Covers MAD 04 – 11 — the destination night you are entraining to.", key: true }
+      ]
+    },
+    { i: 10, date: "2026-05-20", dow: "Wed", n: 20, mon: "MAY", label: "Wed 20 May",
+      tag: "ARRIVAL · R+0", short: "land MAD", kind: "travel", isKey: true, travel: true,
+      summary: "Largest single-day advance. Bright outdoor light is the instrument; no nap is the discipline.",
+      actions: [
+        { id: "wed20-1", t: "02:00 PT", k: "wake", h: "Wake before landing — cabin lights on." },
+        { id: "wed20-2", t: "13:00 CEST", k: "travel", h: "Land MAD." },
+        { id: "wed20-3", t: "13:30 CEST", k: "light",
+          h: "Outside. Walk Madrid. No nap — none.",
+          why: "Maximum advance shift here. The 'just one nap' failure mode costs days.",
+          key: true,
+          deep: {
+            kicker: "KEY ACTION · 13:30 CEST",
+            deck: "The day a nap costs you the trip.",
+            body: [
+              "Your body still thinks it's around 04:30 PT. A 'short nap' at 14:00 CEST lands squarely in the depression of the temperature minimum and reads to your circadian system as 'last night's sleep' — moving DLMO the wrong direction.",
+              "Bright outdoor light at this exact wall-clock hour does the opposite: it hits the phase-advance side of the light PRC and accelerates the alignment. Forty minutes outside is the strongest single intervention you have today.",
+              "Eat, walk, find sun. Bed at 22:30 CEST, not before."
+            ],
+            cite: ["St Hilaire MA et al., 2012 — J Physiol 590:3035", "Eastman & Burgess, 2009 — Sleep Med Rev"]
+          }
+        },
+        { id: "wed20-4", t: "20:30 CEST", k: "melatonin", h: "0.5 mg melatonin." },
+        { id: "wed20-5", t: "22:30 CEST", k: "sleep", h: "Bed, Madrid. Eye mask, blackout.", key: true }
+      ]
+    },
+    { i: 11, date: "2026-05-21", dow: "Thu", n: 21, mon: "MAY", label: "Thu 21 May",
+      tag: "RECOVERY · R+1", short: "recover", kind: "pre", isKey: false, travel: false,
+      summary: "Within 40 minutes of MAD baseline. Hold the morning light habit two more days.",
+      actions: [
+        { t: "06:30 CEST", k: "wake", h: "Wake. Outside within 30 minutes." },
+        { t: "10:00 CEST", k: "caffeine", h: "Coffee." },
+        { t: "23:00 CEST", k: "sleep", h: "Bed at MAD-normal time." }
+      ]
+    }
+  ],
+  notebook: {
+    masthead: {
+      kicker: "JET-LAG BRIEFING · TUE 19 MAY 2026",
+      title: "A westbound week,",
+      titleItalic: "and the long way home.",
+      deck: "Twelve days across nine hours of phase. Wearable readings, melatonin geometry, and the case for a 0.5 mg dose at exactly 18:30 PT on Tuesday."
+    },
+    metadata: [
+      { k: "ORIGIN", v: "Madrid (CEST)" },
+      { k: "DEST.", v: "San Francisco (PT)" },
+      { k: "Δ", v: "9 h advance · then 9 h delay" },
+      { k: "WINDOW", v: "12 → 22 May 2026" },
+      { k: "TRAVELER", v: "C. Almeida · 32M" }
+    ],
+    chartCaption: "DLMO begins MAD-aligned, advances ~9 hours over the SF week, and returns over Tue–Wed of return travel. The two steepest segments — Wed 13 outbound and Wed 20 inbound — share a common instrument: bright outdoor light at destination, no nap. ★ marks key days. Tap any starred point.",
+    garmin: [
+      { metric: "Resting HR (7-night mean)", reading: "54 bpm", read: "Below your baseline of 58. Recovery intact; sleep-bank night didn't blow up the autonomics." },
+      { metric: "HRV (rMSSD, 7-night mean)", reading: "48 ms", read: "Within ±5 ms of baseline. Plan tolerated." },
+      { metric: "Body Battery min (last 24 h)", reading: "32", read: "Caused by Mon's 04:30 wake. Expected; rebuilds tonight on the plane." },
+      { metric: "Sleep onset latency (Mon)", reading: "11 min", read: "Fast — confirms melatonin is being respected by your physiology." },
+      { metric: "Skin temperature deviation", reading: "−0.2 °C", read: "Slight downward drift consistent with circadian advance. Tracking." }
+    ],
+    chartPoints: [
+      { i: 0, y: 0, label: "Sun 10", note: "Baseline. MAD-aligned, DLMO ≈ 21:30 CEST." },
+      { i: 1, y: 0.4, label: "Mon 11", note: "Sleep-banking night. Slight delay carry-in." },
+      { i: 2, y: 2.1, label: "Tue 12", note: "Outbound MAD → SFO. Light + dark scheduling on plane." },
+      { i: 3, y: 4.5, label: "Wed 13", note: "SF day 1. Largest single-day shift.", isKey: true,
+        deep: {
+          kicker: "WED 13 MAY · CHART NODE",
+          deck: "The biggest swing, on the cheapest instrument.",
+          body: [
+            "Day after a westbound flight is when the light PRC is most leveraged. A single 30-minute outdoor walk at 14:00 PT moves DLMO ~2.4 h on its own.",
+            "We chose the afternoon over the morning here because morning light westbound would drag the clock the wrong way. The daylight side of the curve is what you want."
+          ]
+        }
+      },
+      { i: 4, y: 6.7, label: "Thu 14", note: "Convergence steepens." },
+      { i: 5, y: 8.2, label: "Fri 15", note: "Within 1 h of SF target." },
+      { i: 6, y: 8.9, label: "Sat 16", note: "SF-adapted." },
+      { i: 7, y: 8.7, label: "Sun 17", note: "Begin return prep." },
+      { i: 8, y: 7.4, label: "Mon 18", note: "Pre-return advance push begins." },
+      { i: 9, y: 6.2, label: "Tue 19", note: "Return travel. Melatonin at 18:30 PT (KEY).", isKey: true,
+        deep: {
+          kicker: "TUE 19 MAY · CHART NODE",
+          deck: "DLMO at 06:12 PT — drifting back toward MAD.",
+          body: [
+            "Going into today, your body's DLMO has already begun retreating from full SF adaptation. The 0.5 mg melatonin at 18:30 PT and the seven hours of in-flight sleep together advance the phase by approximately 1.8 h overnight.",
+            "Tomorrow morning's bright Madrid light is the second instrument. Together they account for the steep slope between Tue and Wed on the chart."
+          ]
+        }
+      },
+      { i: 10, y: 3.1, label: "Wed 20", note: "Land MAD. Largest single-day phase advance.", isKey: true },
+      { i: 11, y: 0.6, label: "Thu 21", note: "Within 40 minutes of MAD baseline." }
+    ],
+    methodology: [
+      "Phase shifts are estimated from the Burgess 2010 Phase Response Curve for 0.5 mg melatonin and the St Hilaire 2012 light-PRC, calibrated against your wearable-derived DLMO proxy (skin temperature minimum + HRV inflection).",
+      "Sleep-window targets prefer covering destination night over preserving local-night continuity. Caffeine is treated as an antagonist with a 6 h functional half-life.",
+      "Plan recomputes nightly from your Garmin sleep summary; if HRV drops more than 1 SD below baseline two nights running, the plan softens the next-day advance push automatically."
+    ],
+    refs: [
+      "Burgess HJ, Revell VL, Molina TA, Eastman CI (2010). Human phase response curves to three days of daily melatonin: 0.5 mg versus 3.0 mg. J Biol Rhythms 25:402.",
+      "St Hilaire MA et al. (2012). Human phase response curve to a 1 h pulse of bright white light. J Physiol 590:3035.",
+      "Eastman CI, Burgess HJ (2009). How to travel the world without jet lag. Sleep Med Rev 13:213."
+    ]
+  }
+};
+</script>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
-<div class="wrap">
-  <div class="topnav">
-    <a class="back" href="https://github.com/Wolbyworld/jet-lag-protocol">← View on GitHub</a>
-    <span class="label">Sample plan</span>
-  </div>
-  <h1>SF jet-lag plan</h1>
-  <p class="sub">Madrid → SFO → Madrid · 12–22 May 2026 · 9 h delay + 9 h advance</p>
+<div id="root"><div class="booting">LOADING PLAN…</div></div>
 
-  <div class="status-row">
-    <span class="pill" id="status-pill">Today · D+1</span>
-    <button class="back-pill" id="back-pill" onclick="showToday()">← Back</button>
-  </div>
+<script type="text/babel" data-presets="env,react">
+/* eslint-disable */
+// ─── Shared helpers ─────────────────────────────────────────────────────
+const TRIP = window.TRIP;
+const GL = { wake:"↑", light:"☀", lightoff:"◐", caffeine:"C", melatonin:"●", sleep:"☾", travel:"✈" };
 
-  <div class="focus-card" id="focus-card"></div>
+const storeKey = "jetlag:" + (TRIP && TRIP.meta && TRIP.meta.planId || "default");
+const themeKey = storeKey + ":theme";
+const store = {
+  load() { try { return JSON.parse(localStorage.getItem(storeKey) || "{}"); } catch (e) { return {}; } },
+  save(s) { try { localStorage.setItem(storeKey, JSON.stringify(s)); } catch (e) {} }
+};
 
-  <div class="horizon-title">Tap a day</div>
-  <div class="horizon" id="horizon"></div>
+function detectTodayIdx(trip) {
+  if (!trip || !trip.days || !trip.days.length) return 0;
+  const flagged = trip.days.findIndex(d => d.isToday);
+  if (flagged >= 0) return flagged;
+  const todayISO = new Date().toISOString().slice(0, 10);
+  const matchIdx = trip.days.findIndex(d => d.date === todayISO);
+  if (matchIdx >= 0) return matchIdx;
+  if (trip.meta && trip.meta.today && Number.isInteger(trip.meta.today.i) && trip.meta.today.i >= 0 && trip.meta.today.i < trip.days.length) {
+    const hasDates = trip.days.every(d => d.date);
+    if (!hasDates) return trip.meta.today.i;
+  }
+  if (trip.days.every(d => d.date)) {
+    const now = Date.now();
+    let best = 0, bestDelta = Infinity;
+    trip.days.forEach((d, i) => {
+      const delta = Math.abs(new Date(d.date + "T12:00:00").getTime() - now);
+      if (delta < bestDelta) { bestDelta = delta; best = i; }
+    });
+    return best;
+  }
+  return trip.meta && trip.meta.today && trip.meta.today.i || 0;
+}
 
-  <div class="summary-card" id="summary-card">
-    <strong>Today's job:</strong> sleep block + morning sun + dim evening + bedtime melatonin. Three high-leverage moments still ahead — Tue 19 in-flight melatonin, Tue 19 in-flight sleep, Wed 20 outdoor sun on landing in Madrid.<br><br>
-    <strong>Hardest day coming:</strong> Wed 20 May (R+0). Plan for resisting the post-flight nap.
-  </div>
+function isInTrip(trip) {
+  if (!trip || !trip.days || !trip.days.length) return false;
+  if (trip.days.some(d => d.isToday)) return true;
+  if (!trip.days.every(d => d.date)) return true;
+  const todayISO = new Date().toISOString().slice(0, 10);
+  return trip.days.some(d => d.date === todayISO);
+}
 
-  <!-- ======== COLLAPSIBLE CONTEXT ======== -->
-  <div class="context-stack">
+// Style D microcopy helpers (lowercase the world)
+const fmtTimeD = (t) => (t || "").replace(/\s.*/, "").replace(":", " : ");
+const tzLabelD = (t) => {
+  const m = (t || "").match(/\b(PT|PST|PDT|CEST|CET|UTC|GMT|ET|EST|EDT|JST|BST)\b/);
+  if (!m) return "";
+  const map = { PT:"san francisco", PST:"san francisco", PDT:"san francisco",
+    CEST:"madrid", CET:"madrid", UTC:"utc", GMT:"london", BST:"london",
+    ET:"new york", EST:"new york", EDT:"new york", JST:"tokyo" };
+  return map[m[1]] || m[1].toLowerCase();
+};
+const cleanHD = (h) => (h || "").replace(/—/g, "·").replace(/\.$/, "");
 
-    <details class="ctx">
-      <summary>
-        <span class="chev">▸</span>
-        <span class="ctx-title">Personalized for you</span>
-        <span class="ctx-meta">Garmin · last 7 days</span>
-      </summary>
-      <div class="ctx-body">
-        <div class="perso-grid">
-          <div class="perso-stat ok"><div class="num">75</div><div class="label">Sleep score 7d</div><div class="read">FAIR. Two short nights early week pulled the avg down.</div></div>
-          <div class="perso-stat ok"><div class="num">6h11</div><div class="label">Sleep duration</div><div class="read">Shorter than 7h+ default. You're a lean sleeper.</div></div>
-          <div class="perso-stat ok"><div class="num">110/100</div><div class="label">HRV last/weekly (ms)</div><div class="read">BALANCED, above your baseline upper bound (108).</div></div>
-          <div class="perso-stat ok"><div class="num">35–37</div><div class="label">RHR (bpm)</div><div class="read">Athlete-level baseline, stable. No illness flag.</div></div>
-          <div class="perso-stat ok"><div class="num">73→92</div><div class="label">Body battery max</div><div class="read">Trending up.</div></div>
-          <div class="perso-stat flag"><div class="num">17/POOR</div><div class="label">Training readiness</div><div class="read">After this morning's HIIT — recovery time 78h.</div></div>
-          <div class="perso-stat flag"><div class="num">890</div><div class="label">Acute training load</div><div class="read">High. 7 sessions in 7 days.</div></div>
-          <div class="perso-stat ok"><div class="num">22:34/05:09</div><div class="label">Avg bedtime/wake</div><div class="read">Earlier wake than I'd defaulted to.</div></div>
+// ─── App root: theme switcher + lifts shared state up so it survives toggles ──
+const App = () => {
+  if (!TRIP) {
+    return <div style={{padding:"28vh 24px", textAlign:"center", fontFamily:"JetBrains Mono", fontSize:11, letterSpacing:"0.2em", color:"#9a9082", background:"#F4ECD8", minHeight:"100vh"}}>NO PLAN DATA</div>;
+  }
+  const initial = store.load();
+  const computedTodayIdx = detectTodayIdx(TRIP);
+  const tripActive = isInTrip(TRIP);
+  const initialTheme = (() => {
+    try { return localStorage.getItem(themeKey) || (TRIP.meta && TRIP.meta.theme) || "A"; }
+    catch (e) { return "A"; }
+  })();
+
+  const [theme, setThemeState] = React.useState(initialTheme);
+  const setTheme = (t) => {
+    setThemeState(t);
+    try { localStorage.setItem(themeKey, t); } catch (e) {}
+  };
+
+  const [view, setView] = React.useState(initial.view || "plan");
+  const [dayIdx, setDayIdx] = React.useState(initial.dayIdx ?? computedTodayIdx);
+  const [doneIds, setDoneIds] = React.useState(initial.doneIds || []);
+  const [verbose, setVerbose] = React.useState(initial.verbose ?? true);
+  const [drawer, setDrawer] = React.useState(null);
+  const [showMorning, setShowMorning] = React.useState(initial.showMorning !== false);
+  const [expandedActionId, setExpandedActionId] = React.useState(null);
+
+  React.useEffect(() => { store.save({ view, dayIdx, doneIds, verbose, showMorning }); }, [view, dayIdx, doneIds, verbose, showMorning]);
+  React.useEffect(() => {
+    const handler = (e) => {
+      if (e.key === "Escape") { setDrawer(null); return; }
+      if (view !== "plan" || drawer) return;
+      if (e.key === "ArrowLeft" && dayIdx > 0) setDayIdx(dayIdx - 1);
+      if (e.key === "ArrowRight" && dayIdx < TRIP.days.length - 1) setDayIdx(dayIdx + 1);
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [dayIdx, view, drawer]);
+  React.useEffect(() => { document.body.style.overflow = drawer ? "hidden" : ""; return () => { document.body.style.overflow = ""; }; }, [drawer]);
+
+  const toggleDone = (id) => setDoneIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+
+  const sharedProps = {
+    view, setView, dayIdx, setDayIdx, doneIds, toggleDone, drawer, setDrawer,
+    showMorning, setShowMorning, expandedActionId, setExpandedActionId,
+    verbose, setVerbose, tripActive, computedTodayIdx, theme, setTheme
+  };
+
+  const Theme = theme === "D" ? PrototypeD : PrototypeA;
+  return <Theme {...sharedProps} />;
+};
+
+// =========================================================================
+// THEME A — Editorial Almanac
+// =========================================================================
+
+const PrototypeA = (P) => {
+  return (
+    <div style={{ width:"100%", minHeight:"100vh", background:A_TOK.paper, color:A_TOK.ink, fontFamily:A_TOK.sans, position:"relative" }}>
+      {P.view === "plan" ? <PlanA {...P} /> : <NotebookA {...P} />}
+      <DrawerA drawer={P.drawer} onClose={() => P.setDrawer(null)}
+        onJumpToNotebook={() => { P.setView("notebook"); P.setDrawer(null); }} />
+      <ThemeSwitch theme={P.theme} setTheme={P.setTheme} variant="A" />
+    </div>
+  );
+};
+
+const PlanA = ({ dayIdx, setDayIdx, verbose, setVerbose, doneIds, toggleDone,
+  setDrawer, setView, showMorning, setShowMorning,
+  expandedActionId, setExpandedActionId, tripActive, computedTodayIdx }) => {
+  const day = TRIP.days[dayIdx];
+  const isShownDayToday = dayIdx === computedTodayIdx && tripActive;
+  const offsetFromToday = dayIdx - computedTodayIdx;
+  const dayTitle = isShownDayToday ? "Today"
+    : (tripActive && offsetFromToday === 1) ? "Tomorrow"
+    : (tripActive && offsetFromToday === -1) ? "Yesterday"
+    : day.label;
+  const summaryFirstSentence = (day.summary || "").split(".")[0];
+  const meta = TRIP.meta || {};
+  const next = meta.next;
+  const morning = TRIP.morning;
+
+  return (
+    <div style={planA.frame}>
+      <header style={planA.head}>
+        <div style={planA.headRow1}>
+          <div style={planA.kicker}>{meta.route}{meta.delta ? " · " + meta.delta : ""}</div>
+          <button onClick={() => setView("notebook")} style={planA.tabBtn}>Notebook ↗</button>
         </div>
-        <div class="perso-adj">
-          <div class="head">Mon 11 May bedtime moved 21:00 → 22:00</div>
-          <div class="body">Your real sleep target is ~6h30, not 7h+. With a 04:30 Tue wake, the sleep-bank rule lands at 22:00 — your sleep gate. The 21:00 we had initially would have pushed into your wake-maintenance zone.</div>
+        <div style={planA.dayLine}>
+          <button onClick={() => dayIdx > 0 && setDayIdx(dayIdx - 1)} disabled={dayIdx === 0}
+            style={{...planA.navArrow, opacity: dayIdx === 0 ? 0.25 : 1}} aria-label="Previous day">◂</button>
+          <div style={planA.dayMain}>
+            <div style={planA.dayKick}>
+              <span>{day.tag}</span>
+              {day.isKey && <span style={{color:A_TOK.vermil, marginLeft:6}}>★</span>}
+            </div>
+            <div style={planA.dayTitle}>{dayTitle}</div>
+            {summaryFirstSentence && <div style={planA.daySub}>{day.label} · <em>{summaryFirstSentence}</em></div>}
+          </div>
+          <button onClick={() => dayIdx < TRIP.days.length - 1 && setDayIdx(dayIdx + 1)} disabled={dayIdx === TRIP.days.length - 1}
+            style={{...planA.navArrow, opacity: dayIdx === TRIP.days.length - 1 ? 0.25 : 1}} aria-label="Next day">▸</button>
         </div>
-        <div class="perso-adj">
-          <div class="head">Training taper Sun 10 → Wed 13 May</div>
-          <div class="body">Acute load 890 with today's training readiness 17/POOR is heavy fatigue. Drop HIIT from Sun 10 → Wed 13. Easy aerobic running is fine — recovery-positive at your current load.</div>
+        {isShownDayToday && next && (
+          <div style={planA.nowRow}>
+            <span style={planA.nowDot} />
+            <span style={planA.nowTime}>NOW · {meta.nowLabel || ""}</span>
+            <span style={planA.nowSep}>·</span>
+            <span style={planA.nowNext}>next <span style={{fontFamily:A_TOK.mono, fontStyle:"normal"}}>{(next.time || "").split(" ")[0]}</span> {next.label}</span>
+          </div>
+        )}
+      </header>
+      <div style={planA.scroll}>
+        {isShownDayToday && showMorning && morning && (
+          <div style={planA.morning}>
+            <div style={planA.morningKick}>
+              <span>{morning.kicker}</span>
+              <button onClick={() => setShowMorning(false)} style={planA.morningClose} aria-label="Dismiss">×</button>
+            </div>
+            <div style={planA.morningHead}>{morning.headline}</div>
+            {morning.body && <p style={planA.morningBody}>{morning.body}</p>}
+            {morning.deltas && morning.deltas.length > 0 && (
+              <div style={planA.morningGrid}>
+                {morning.deltas.map((d, i) => (
+                  <div key={i}>
+                    <div style={planA.morningK}>{d.k}</div>
+                    <div style={planA.morningV}>{d.v}</div>
+                    {d.note && <div style={planA.morningN}>{d.note}</div>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+        <div style={planA.listHead}>
+          <span style={planA.listKick}>§ {dayTitle.toUpperCase()} · {day.actions.length} ACTION{day.actions.length === 1 ? "" : "S"}</span>
+          {isShownDayToday && (
+            <div style={planA.modeRow}>
+              <button onClick={() => setVerbose(false)} style={{...planA.modeBtn, ...(!verbose ? planA.modeBtnOn : {})}}>Compact</button>
+              <button onClick={() => setVerbose(true)} style={{...planA.modeBtn, ...(verbose ? planA.modeBtnOn : {})}}>Verbose</button>
+            </div>
+          )}
         </div>
-        <div class="perso-adj">
-          <div class="head">No protocol-intensity softening</div>
-          <div class="body">HRV BALANCED, RHR stable, body battery trending up. Run the protocol at full nominal intensity — 1.5h/day delay outbound, 1.0h/day advance return.</div>
+        <div style={planA.list}>
+          {day.actions.map((a, i) => {
+            const aid = a.id || `${day.i}-${i}`;
+            const done = doneIds.includes(aid) || a.done;
+            const expanded = expandedActionId === aid;
+            return (<ActionRowA
+              key={aid} action={a} aid={aid} done={done} expanded={expanded} verbose={verbose}
+              onToggleDone={() => toggleDone(aid)}
+              onActivate={() => {
+                if (a.deep) setDrawer({ kind:"action", action:a });
+                else if (a.why) setExpandedActionId(expanded ? null : aid);
+              }}
+            />);
+          })}
+        </div>
+        <HorizonStripA dayIdx={dayIdx} setDayIdx={setDayIdx} computedTodayIdx={computedTodayIdx} />
+        <div style={planA.foot}>
+          <span style={planA.footMeta}>plan{meta.planId ? " · " + meta.planId : ""}{meta.generatedAt ? " · gen " + meta.generatedAt : ""}</span>
         </div>
       </div>
-    </details>
+    </div>
+  );
+};
 
-    <details class="ctx">
-      <summary>
-        <span class="chev">▸</span>
-        <span class="ctx-title">The convergence story</span>
-        <span class="ctx-meta">Why the plan has this shape</span>
-      </summary>
-      <div class="ctx-body">
-        <div class="traj-wrap">
-          <svg viewBox="0 0 860 220" xmlns="http://www.w3.org/2000/svg">
-            <g font-size="9" fill="#94a3b8" text-anchor="end">
-              <text x="68" y="36">12:00</text>
-              <text x="68" y="76">18:00</text>
-              <text x="68" y="116">00:00</text>
-              <text x="68" y="156">06:00</text>
-              <text x="68" y="196">12:00</text>
-            </g>
-            <g stroke="#e7e5e4" stroke-width="0.8">
-              <line x1="74" y1="32" x2="850" y2="32"/>
-              <line x1="74" y1="72" x2="850" y2="72"/>
-              <line x1="74" y1="112" x2="850" y2="112"/>
-              <line x1="74" y1="152" x2="850" y2="152"/>
-              <line x1="74" y1="192" x2="850" y2="192"/>
-            </g>
-            <g font-size="9" fill="#94a3b8" text-anchor="middle">
-              <text x="105" y="212">Sun 10</text><text x="170" y="212">Mon 11</text><text x="235" y="212">Tue 12</text><text x="300" y="212">Wed 13</text><text x="365" y="212">Thu 14</text><text x="430" y="212">Fri 15</text><text x="495" y="212">Sat 16</text><text x="560" y="212">Sun 17</text><text x="625" y="212">Mon 18</text><text x="690" y="212">Tue 19</text><text x="755" y="212">Wed 20</text><text x="820" y="212">Thu 21</text>
-            </g>
-            <line x1="74" y1="89" x2="850" y2="89" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,3" opacity="0.7"/>
-            <text x="80" y="86" font-size="9" fill="#475569" font-weight="600">MAD DLMO target</text>
-            <line x1="74" y1="149" x2="850" y2="149" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,3" opacity="0.7"/>
-            <text x="80" y="146" font-size="9" fill="#475569" font-weight="600">SFO DLMO target</text>
-            <rect x="74" y="22" width="130" height="180" fill="#dbeafe" opacity="0.25"/>
-            <text x="139" y="38" text-anchor="middle" font-size="9" fill="#1e40af" font-weight="600">pre-flight</text>
-            <rect x="204" y="22" width="65" height="180" fill="#fef3c7" opacity="0.4"/>
-            <text x="237" y="38" text-anchor="middle" font-size="9" fill="#92400e" font-weight="600">travel</text>
-            <rect x="269" y="22" width="260" height="180" fill="#dcfce7" opacity="0.25"/>
-            <text x="399" y="38" text-anchor="middle" font-size="9" fill="#166534" font-weight="600">SF adaptation</text>
-            <rect x="529" y="22" width="130" height="180" fill="#fef3c7" opacity="0.4"/>
-            <text x="594" y="38" text-anchor="middle" font-size="9" fill="#92400e" font-weight="600">pre-return</text>
-            <rect x="659" y="22" width="65" height="180" fill="#fef3c7" opacity="0.4"/>
-            <text x="691" y="38" text-anchor="middle" font-size="9" fill="#92400e" font-weight="600">travel</text>
-            <rect x="724" y="22" width="126" height="180" fill="#dbeafe" opacity="0.25"/>
-            <text x="787" y="38" text-anchor="middle" font-size="9" fill="#1e40af" font-weight="600">recovery</text>
-            <path d="M 105,89 L 170,89 L 235,92 L 300,102 L 365,114 L 430,128 L 495,138 L 560,149 L 625,142 L 690,135 L 755,120 L 820,102" stroke="#047857" stroke-width="2.5" fill="none"/>
-            <g fill="#047857" stroke="white" stroke-width="1">
-              <circle cx="105" cy="89" r="3.5"/><circle cx="170" cy="89" r="3.5"/><circle cx="235" cy="92" r="3.5"/><circle cx="300" cy="102" r="3.5"/><circle cx="365" cy="114" r="3.5"/><circle cx="430" cy="128" r="3.5"/><circle cx="495" cy="138" r="3.5"/><circle cx="560" cy="149" r="3.5"/><circle cx="625" cy="142" r="3.5"/><circle cx="690" cy="135" r="3.5"/><circle cx="755" cy="120" r="3.5"/><circle cx="820" cy="102" r="3.5"/>
-            </g>
-          </svg>
+const ActionRowA = ({ action, aid, done, expanded, verbose, onToggleDone, onActivate }) => {
+  const a = action;
+  const showWhy = a.why && (verbose || expanded || a.key);
+  const interactive = !!(a.why || a.deep);
+  const handleRow = () => { if (interactive && !done) onActivate(); };
+  return (
+    <div
+      style={{...arA.wrap, ...(done ? arA.wrapDone : {}), cursor: interactive && !done ? "pointer" : "default"}}
+      onClick={handleRow}
+      role={interactive ? "button" : undefined}
+      tabIndex={interactive ? 0 : -1}
+      onKeyDown={interactive ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleRow(); } } : undefined}
+    >
+      {a.key && <div style={arA.keyTab} />}
+      <button
+        onClick={(e) => { e.stopPropagation(); onToggleDone(); }}
+        style={arA.checkbox} aria-label={done ? "Mark not done" : "Mark done"}
+      >
+        {done && <span style={{color:A_TOK.ink, fontSize:13, lineHeight:1, fontFamily:A_TOK.serif}}>✓</span>}
+      </button>
+      <div style={arA.t}>{(a.t || "").replace(/^~/, "")}</div>
+      <div style={arA.glyph}>{GL[a.k] || "·"}</div>
+      <div>
+        <div style={{...arA.h, ...(done ? arA.hDone : {})}}>
+          {a.h}
+          {a.key && <span style={{color:A_TOK.vermil, marginLeft:4}}>★</span>}
+          {a.deep && <span style={arA.openMark}> ↗</span>}
         </div>
-        <p class="caption">Green line = your body's DLMO drifting across the trip. Sun–Mon: small drift. Tue: travel. Wed–Sat: drifts toward SFO target as light + melatonin push the clock later. Sun–Mon (return prep): pulls back early. Tue: long sleep block on the eastward flight does the heavy lifting. Wed–Thu: arrival sunlight + bedtime melatonin completes re-entrainment.</p>
-
-        <div style="margin-top: 22px;">
-          <div class="next-up" style="margin-bottom: 10px;">Five high-leverage moments</div>
-          <div class="moment"><div class="num">1</div><div class="text"><div class="when">Mon 11 · 22:00 CEST</div><div class="what-l">Sleep-bank night</div><div class="why-l">Bedtime calibrated to your 6h30 target before the early flight. Without it: 4 h sleep deficit on top of 9 h jet lag.</div></div></div>
-          <div class="moment"><div class="num">2</div><div class="text"><div class="when">Tue 12 · 14:00–18:00 PT</div><div class="what-l">Outdoor sun on SF arrival</div><div class="why-l">Lands in the peak of the delay PRC for your body's evening. Single biggest free dose of phase-shifting power.</div></div></div>
-          <div class="moment"><div class="num">3</div><div class="text"><div class="when">Tue 19 · 18:30 PT</div><div class="what-l">0.5 mg melatonin shortly after takeoff</div><div class="why-l">3 h before SF-adapted DLMO — exact peak-advance window of the 0.5 mg PRC (Burgess 2010).</div></div></div>
-          <div class="moment"><div class="num">4</div><div class="text"><div class="when">Tue 19 18:45 → Wed 20 02:00 PT</div><div class="what-l">Sleep through the eastward flight</div><div class="why-l">Covers MAD's 04:00–11:00 — exactly the destination night you're entraining to.</div></div></div>
-          <div class="moment"><div class="num">5</div><div class="text"><div class="when">Wed 20 · 13:00–18:00 CEST</div><div class="what-l">Outdoor light on landing in Madrid</div><div class="why-l">Body's biological morning post-CBT_min — light delivers maximum advance shift. The "just one nap" failure here costs days.</div></div></div>
-        </div>
+        {showWhy && !done && <div style={arA.why}>— {a.why}</div>}
+        {a.next && !done && <div style={arA.nextChip}>NEXT</div>}
       </div>
-    </details>
+    </div>
+  );
+};
 
-    <details class="ctx">
-      <summary>
-        <span class="chev">▸</span>
-        <span class="ctx-title">Methodology &amp; sources</span>
-        <span class="ctx-meta">8 papers, every constant traceable</span>
-      </summary>
-      <div class="ctx-body">
-        <div class="prose">
-          <p>This plan was generated by a circadian phase-shift algorithm that applies eleven rules grounded in primary sleep-medicine literature. Every numerical constant traces back to a specific study.</p>
-          <p><strong>Westward delays are easier than eastward advances.</strong> Human τ ≈ 24.2 h, slightly long, so the body drifts later naturally. With full intervention you can shift ~1.5 h/day west, ~1.0 h/day east. That's why SF outbound recovery is 4 days but the return is closer to 6.</p>
-          <p><strong>Light is more powerful than melatonin.</strong> Properly-timed bright outdoor light shifts the clock 2–3× more than 0.5 mg melatonin per dose. Melatonin's job is to make sleep happen at the right time so the next day's light dose lands in the right window.</p>
-          <p><strong>Caffeine is for alertness, not for shifting.</strong> ~40 min phase delay from a strong dose, half the magnitude of evening bright light. Cutoffs exist to protect sleep, not to drive the clock.</p>
-        </div>
-        <div class="refs">
-          <strong style="color: var(--fg);">Primary literature:</strong> Khalsa et al. 2003 (light PRC) · Burgess et al. 2010 (0.5 mg melatonin PRC) · Zeitzer et al. 2000 (light dose-response) · Burke et al. 2015 (caffeine pharmacology) · Eastman &amp; Burgess 2009 (operational protocols) · Borbély 1982 (two-process sleep model) · Burgess 2014 + Kantermann 2015 (DLMO from chronotype).
-        </div>
-      </div>
-    </details>
-
+const HorizonStripA = ({ dayIdx, setDayIdx, computedTodayIdx }) => (
+  <div style={hsA.wrap}>
+    <div style={hsA.kicker}>HORIZON · {TRIP.days.length} DAYS · TAP TO JUMP</div>
+    <div style={{...hsA.grid, gridTemplateColumns: `repeat(${TRIP.days.length}, 1fr)`}}>
+      {TRIP.days.map((d, i) => {
+        const isCurrent = i === dayIdx;
+        const isToday = i === computedTodayIdx;
+        return (<button key={i} onClick={() => setDayIdx(i)} style={{
+          ...hsA.cell,
+          ...(isCurrent ? hsA.cellCurrent : {}),
+          ...(isToday && !isCurrent ? hsA.cellToday : {}),
+          ...(d.isKey && !isCurrent && !isToday ? hsA.cellKey : {})
+        }}>
+          <div style={hsA.dow}>{(d.dow || "").charAt(0)}</div>
+          <div style={hsA.n}>{d.n}</div>
+          <div style={hsA.tag}>
+            {d.travel && <span style={{marginRight:2}}>✈</span>}
+            {d.isKey && <span style={{color: isCurrent ? A_TOK.paper : A_TOK.vermil}}>★</span>}
+            {!d.travel && !d.isKey && <span style={{color:A_TOK.inkFade}}>·</span>}
+          </div>
+        </button>);
+      })}
+    </div>
   </div>
-</div>
+);
 
-<script>
-const days = [
-  { date: "2026-05-10", num: 10, dayShort: "Sun", phaseLabel: "D−2 · MAD", title: "Sun, 10 May", phaseFull: "Pre-flight · Day 1 — small drift later", isKey: false,
-    actions: [
-      { type: "wake", time: "06:30", h: "Wake", why: "Sunglasses outside before 09:00 — stops morning light from advancing your clock against the delay direction." },
-      { type: "caf", time: "14:00", h: "Last coffee" },
-      { type: "lights", time: "19:00", h: "Outdoor walk after dinner", why: "Bright evening light helps you stay up later — small delay drift." },
-      { type: "bed", time: "23:00", h: "Bed", why: "30 min later than usual." }
-    ], dots: ["s","l",""] },
-  { date: "2026-05-11", num: 11, dayShort: "Mon", phaseLabel: "D−1 · sleep-bank ★", title: "Mon, 11 May", phaseFull: "Sleep-bank night · D−1", isKey: true,
-    actions: [
-      { type: "wake", time: "05:30", h: "Wake earlier than usual" },
-      { type: "caf", time: "11:00", h: "Last coffee", why: "Early cutoff to protect tonight's sleep." },
-      { type: "lights", time: "16:00", h: "Outdoor walk — last evening light dose" },
-      { type: "mel", time: "21:30", h: "0.5 mg melatonin (sleep aid)", star: true },
-      { type: "bed", time: "22:00", h: "Bed early", star: true, why: "Sleep gate opens around now. 6.5 h before tomorrow's 04:30 alarm." }
-    ], dots: ["s","l","m"], why: "The night before an early flight is sleep-banking, not phase-shifting. Pushing later via the protocol would leave you with 4 h sleep before a 24 h day. Bed at 22:00 lands at your sleep gate." },
-  { date: "2026-05-12", num: 12, dayShort: "Tue ✈", phaseLabel: "D+0 · MAD→SFO ★", title: "Tue, 12 May", phaseFull: "Travel day · MAD → SFO", isKey: true,
-    actions: [
-      { type: "wake", time: "04:30", h: "Alarm" },
-      { type: "fly", time: "05:00", h: "MAD → LHR feeder" },
-      { type: "fly", time: "10:45", h: "LHR → SFO (11 h)" },
-      { type: "caf", time: "in-flight", h: "Caffeine first half. Cutoff 16:00 BST." },
-      { type: "bed", time: "~10:00 PT", h: "Sleep last 3 h of flight, eye mask" },
-      { type: "lights", time: "14:00 PT", h: "Outside immediately on landing", star: true, why: "Biggest free phase shift of the trip. 4 h direct sunlight 14:00–18:00 PT." },
-      { type: "lightsoft", time: "20:00 PT", h: "Dim everything" },
-      { type: "mel", time: "22:00 PT", h: "0.5 mg melatonin" },
-      { type: "bed", time: "22:30 PT", h: "Bed (destination clock)" }
-    ], dots: ["s","l","m"], why: "The arrival-light dose is the trip's biggest free intervention. Stay outside 14:00–18:00 PT, even if you're tired." },
-  { date: "2026-05-13", num: 13, dayShort: "Wed", phaseLabel: "D+1 · SF · adapt", title: "Wed, 13 May", phaseFull: "Adapting to SF · Day 1 in destination", isKey: false,
-    actions: [
-      { type: "lights", time: "08:00", h: "Outdoor walk, 30+ min", why: "Strong-seek light entrains wake — your dominant zeitgeber." },
-      { type: "caf", time: "13:00", h: "Last coffee", why: "~5 h half-life means consumption past here disrupts tonight." },
-      { type: "note", time: "14:00", h: "Coffee with a colleague", why: "Outdoor cafe if possible — extends your light dose." },
-      { type: "mel", time: "21:30", h: "0.5 mg melatonin" },
-      { type: "bed", time: "22:00", h: "Bed", why: "Body says 07:00 home time. Eye mask, blackout, no screens past 21:30." }
-    ], dots: ["s","l","m"] },
-  { date: "2026-05-14", num: 14, dayShort: "Thu", phaseLabel: "D+2 · SF", title: "Thu, 14 May", phaseFull: "SF · Day 2 — easier", isKey: false,
-    actions: [
-      { type: "wake", time: "06:00", h: "Wake naturally easier today" },
-      { type: "lights", time: "08:00–12:00", h: "Outside — outdoor meetings clustered in the morning" },
-      { type: "caf", time: "13:00", h: "Last coffee" },
-      { type: "mel", time: "22:00", h: "0.5 mg melatonin" },
-      { type: "bed", time: "22:30", h: "Bed" }
-    ], dots: ["s","l","m"] },
-  { date: "2026-05-15", num: 15, dayShort: "Fri", phaseLabel: "D+3 · ~adapted", title: "Fri, 15 May", phaseFull: "~80% adapted — drop intensity", isKey: false,
-    actions: [
-      { type: "wake", time: "06:00", h: "Normal SF day" },
-      { type: "caf", time: "14:00", h: "Coffee cutoff back to normal" },
-      { type: "bed", time: "22:30", h: "Bed — melatonin optional" }
-    ], dots: ["s","l",""] },
-  { date: "2026-05-16", num: 16, dayShort: "Sat", phaseLabel: "D+4 · adapted", title: "Sat, 16 May", phaseFull: "Fully adapted — no protocol", isKey: false,
-    actions: [{ type: "wake", time: "all day", h: "Live as a local. No protocol today." }], dots: ["s","",""] },
-  { date: "2026-05-17", num: 17, dayShort: "Sun", phaseLabel: "D−2 ret · advance", title: "Sun, 17 May", phaseFull: "Pre-return advance starts", isKey: false,
-    actions: [
-      { type: "wake", time: "06:00", h: "Bright light immediately on wake" },
-      { type: "caf", time: "11:00", h: "Caffeine cutoff moves earlier" },
-      { type: "note", time: "17:00", h: "Summit begins (destination area)" },
-      { type: "mel", time: "16:30", h: "0.5 mg melatonin (afternoon advance)" },
-      { type: "bed", time: "21:30", h: "Bed earlier than yesterday" }
-    ], dots: ["s","l","m"] },
-  { date: "2026-05-18", num: 18, dayShort: "Mon", phaseLabel: "D−1 ret · summit", title: "Mon, 18 May", phaseFull: "Pre-return + summit", isKey: false,
-    actions: [
-      { type: "wake", time: "05:30", h: "Walk before summit kickoff" },
-      { type: "note", time: "02:00 / 03:00", h: "Recurring virtual home-TZ meeting" },
-      { type: "caf", time: "10:00", h: "Caffeine cutoff" },
-      { type: "mel", time: "15:30", h: "0.5 mg melatonin" },
-      { type: "bed", time: "20:30", h: "Bed if summit allows" }
-    ], dots: ["s","l","m"] },
-  { date: "2026-05-19", num: 19, dayShort: "Tue ✈", phaseLabel: "D+0 ret · SFO→MAD ★", title: "Tue, 19 May", phaseFull: "Return travel · SFO → MAD", isKey: true,
-    actions: [
-      { type: "wake", time: "04:30", h: "Wake; bright light immediately" },
-      { type: "caf", time: "11:00", h: "Last coffee — locked, no exceptions" },
-      { type: "lightsoft", time: "14:00", h: "Sunglasses, screens dim from now until takeoff" },
-      { type: "fly", time: "17:45", h: "SFO → MAD departs" },
-      { type: "mel", time: "~18:30", h: "0.5 mg melatonin shortly after takeoff", star: true, why: "By takeoff DLMO ~21:30 PDT. Dose lands 3 h before — exact peak-advance window of 0.5 mg PRC. Doubles as soporific for in-flight sleep." },
-      { type: "bed", time: "~18:45", h: "Sleep on plane (~7 h)", star: true, why: "Covers MAD's 04:00–11:00 — destination night you're entraining to." }
-    ], dots: ["s","l","m"], why: "Two leverage moments back-to-back: in-flight melatonin (peak-advance window) and the long sleep block aligned to MAD's biological night." },
-  { date: "2026-05-20", num: 20, dayShort: "Wed ✈", phaseLabel: "R+0 · land MAD ★", title: "Wed, 20 May", phaseFull: "Arrival in Madrid · the hardest day", isKey: true,
-    actions: [
-      { type: "wake", time: "~02:00 PT", h: "Wake before landing — cabin lights on" },
-      { type: "fly", time: "13:00 CEST", h: "Land MAD" },
-      { type: "lights", time: "13:00–18:00", h: "Outside on landing. No nap. Walk in the city.", star: true, why: "Maximum advance shift here. The 'just one nap' failure mode costs days of recovery." },
-      { type: "mel", time: "20:30", h: "0.5 mg melatonin" },
-      { type: "bed", time: "22:30", h: "Bed" }
-    ], dots: ["s","l","m"], why: "This is the day the protocol is most likely to fail — post-flight fatigue + the 'one nap' temptation. Stay vertical, stay outside, stay on plan." },
-  { date: "2026-05-21", num: 21, dayShort: "Thu", phaseLabel: "R+1 · recovery", title: "Thu, 21 May", phaseFull: "Recovery in Madrid · Day 1", isKey: false,
-    actions: [
-      { type: "wake", time: "06:00", h: "Bright light on wake" },
-      { type: "caf", time: "14:00", h: "Coffee cutoff" },
-      { type: "mel", time: "16:30", h: "0.5 mg melatonin" },
-      { type: "bed", time: "22:30", h: "Bed" }
-    ], dots: ["s","l","m"] },
-];
+const NotebookA = ({ setDrawer, setView }) => {
+  const N = TRIP.notebook || {};
+  const meta = TRIP.meta || {};
+  const masthead = N.masthead || {};
+  return (
+    <div style={nbA.frame}>
+      <div style={nbA.bar}>
+        <div style={nbA.barKicker}>PLAN{meta.planId ? " · " + meta.planId : ""}</div>
+        <button onClick={() => setView("plan")} style={nbA.barBtn}>← Plan</button>
+      </div>
+      <div style={nbA.scroll}>
+        {(masthead.title || masthead.kicker) && (
+          <div style={nbA.masthead}>
+            {masthead.kicker && <div style={nbA.mhKicker}>{masthead.kicker}</div>}
+            {(masthead.title || masthead.titleItalic) && (
+              <h1 style={nbA.h1}>
+                {masthead.title}
+                {masthead.titleItalic && <><br/><em style={nbA.h1Em}>{masthead.titleItalic}</em></>}
+              </h1>
+            )}
+            {masthead.deck && <p style={nbA.deck}>{masthead.deck}</p>}
+            {N.metadata && N.metadata.length > 0 && (
+              <div style={{...nbA.metaRow, gridTemplateColumns: `repeat(${N.metadata.length}, 1fr)`}}>
+                {N.metadata.map((m, i) => (<div key={i}><div style={nbA.metaK}>{m.k}</div><div style={nbA.metaV}>{m.v}</div></div>))}
+              </div>
+            )}
+          </div>
+        )}
+        {N.chartPoints && N.chartPoints.length > 0 && (
+          <SectionA roman="I" title="The convergence">
+            <div style={nbA.chartWrap}>
+              <ConvergenceChartA points={N.chartPoints} onPointClick={(p) => p.deep && setDrawer({ kind:"chart", point:p })} />
+            </div>
+            {N.chartCaption && <p style={nbA.caption}><span style={nbA.dropcap}>{N.chartCaption.charAt(0)}</span>{N.chartCaption.slice(1)}</p>}
+          </SectionA>
+        )}
+        {N.garmin && N.garmin.length > 0 && (
+          <SectionA roman={romanA(2, N)} title="What your wearable said this week">
+            <div style={nbA.table}>
+              <div style={nbA.tHead}><span>METRIC</span><span>READING</span><span>READ</span></div>
+              {N.garmin.map((g, i) => (
+                <div key={i} style={nbA.tRow}>
+                  <div style={nbA.tMetric}>{g.metric}</div>
+                  <div style={nbA.tReading}>{g.reading}</div>
+                  <div style={nbA.tRead}>{g.read}</div>
+                </div>
+              ))}
+            </div>
+          </SectionA>
+        )}
+        {N.methodology && N.methodology.length > 0 && (
+          <SectionA roman={romanA(3, N)} title="How the plan thinks">
+            {N.methodology.map((p, i) => (
+              <p key={i} style={nbA.prose}>
+                {i === 0 && <span style={nbA.dropcap}>{p.charAt(0)}</span>}
+                {i === 0 ? p.slice(1) : p}
+              </p>
+            ))}
+          </SectionA>
+        )}
+        {N.refs && N.refs.length > 0 && (
+          <SectionA roman={romanA(4, N)} title="References">
+            {N.refs.map((r, i) => <div key={i} style={nbA.ref}>▸ {r}</div>)}
+          </SectionA>
+        )}
+        <div style={nbA.colophon}>
+          {meta.planId && <span>{meta.planId}</span>}
+          {meta.generatedAt && <span>generated {meta.generatedAt}</span>}
+          <span>not medical advice</span>
+        </div>
+      </div>
+    </div>
+  );
+};
 
-const iconMap = { bed: "🌙", wake: "↑", lights: "☀", lightsoft: "◐", mel: "●", caf: "☕", fly: "✈", note: "!" };
-
-const focusCard = document.getElementById('focus-card');
-const horizon = document.getElementById('horizon');
-const statusPill = document.getElementById('status-pill');
-const backPill = document.getElementById('back-pill');
-const summaryCard = document.getElementById('summary-card');
-
-// === Compute "today" — index of the day matching today's date, OR the closest day ===
-function computeTripState() {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const todayMs = today.getTime();
-
-  // Exact match
-  for (let i = 0; i < days.length; i++) {
-    const d = new Date(days[i].date);
-    d.setHours(0, 0, 0, 0);
-    if (d.getTime() === todayMs) {
-      return { idx: i, status: 'today' };
-    }
-  }
-
-  // Outside trip range — find closest
-  const firstMs = new Date(days[0].date).setHours(0,0,0,0);
-  const lastMs = new Date(days[days.length-1].date).setHours(0,0,0,0);
-
-  if (todayMs < firstMs) {
-    const daysUntil = Math.round((firstMs - todayMs) / 86400000);
-    return { idx: 0, status: 'before', daysUntil };
-  } else {
-    const daysAgo = Math.round((todayMs - lastMs) / 86400000);
-    return { idx: days.length - 1, status: 'after', daysAgo };
-  }
+function romanA(slot, N) {
+  const present = [
+    !!(N.chartPoints && N.chartPoints.length),
+    !!(N.garmin && N.garmin.length),
+    !!(N.methodology && N.methodology.length),
+    !!(N.refs && N.refs.length)
+  ];
+  let n = 0;
+  for (let i = 0; i < slot; i++) if (present[i]) n++;
+  return ["", "I", "II", "III", "IV"][n] || "·";
 }
 
-const tripState = computeTripState();
-const TODAY_INDEX = tripState.status === 'today' ? tripState.idx : -1;
-const DEFAULT_INDEX = tripState.idx;
+const SectionA = ({ roman, title, children }) => (
+  <div style={secA.wrap}>
+    <div style={secA.head}>
+      <span style={secA.roman}>§ {roman}</span>
+      <h2 style={secA.h}>{title}</h2>
+    </div>
+    {children}
+  </div>
+);
 
-function renderFocus(idx) {
-  const d = days[idx];
-  if (!d) return;
-  let html = `<div class="focus-day">${d.title}</div>`;
-  html += `<div class="focus-phase">${d.phaseFull}${d.isKey ? '<span class="key-tag">★ Key day</span>' : ''}</div>`;
-  html += `<div class="next-up">${idx === TODAY_INDEX ? "Next 5 actions" : "Actions for this day"}</div>`;
-  html += `<ul class="actions">`;
-  d.actions.forEach(a => {
-    const star = a.star ? '<span class="star">★ </span>' : '';
-    html += `<li><div class="icon ${a.type}">${iconMap[a.type] || '·'}</div><div class="when">${a.time}</div><div class="what"><div class="h">${star}${a.h}</div>${a.why ? `<div class="why">${a.why}</div>` : ''}</div></li>`;
-  });
-  html += `</ul>`;
-  if (d.why) html += `<details class="day-why"><summary>Why this day matters</summary><div class="body">${d.why}</div></details>`;
-  focusCard.classList.add('fading');
-  setTimeout(() => { focusCard.innerHTML = html; focusCard.classList.remove('fading'); }, 120);
-}
+const ConvergenceChartA = ({ points, onPointClick }) => {
+  const W = 376, H = 220, padL = 38, padR = 12, padT = 16, padB = 38;
+  const innerW = W - padL - padR, innerH = H - padT - padB;
+  const xMax = Math.max(1, points.length - 1);
+  const yMax = Math.max(9, Math.ceil(Math.max(...points.map(p => p.y))));
+  const x = (i) => padL + (i / xMax) * innerW;
+  const y = (v) => padT + innerH - (v / yMax) * innerH;
+  const path = points.map((p, i) => `${i === 0 ? "M" : "L"} ${x(p.i)} ${y(p.y)}`).join(" ");
+  const yTicks = [0, Math.round(yMax/3), Math.round(2*yMax/3), yMax];
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%", height:"auto", display:"block"}}>
+      <line x1={padL} y1={padT} x2={padL} y2={H-padB} stroke={A_TOK.ink} strokeWidth="1"/>
+      <line x1={padL} y1={H-padB} x2={W-padR} y2={H-padB} stroke={A_TOK.ink} strokeWidth="1"/>
+      {yTicks.map((v, i) => (
+        <g key={i}>
+          <line x1={padL-3} y1={y(v)} x2={padL} y2={y(v)} stroke={A_TOK.ink} strokeWidth="1"/>
+          <text x={padL-6} y={y(v)+3} textAnchor="end" fontFamily={A_TOK.mono} fontSize="9" fill={A_TOK.inkMute}>+{v}h</text>
+        </g>
+      ))}
+      <line x1={padL} y1={y(yMax)} x2={W-padR} y2={y(yMax)} stroke={A_TOK.indigo} strokeDasharray="3 3" strokeWidth="0.8"/>
+      <text x={W-padR-2} y={y(yMax)-3} textAnchor="end" fontFamily={A_TOK.mono} fontSize="8" fill={A_TOK.indigo}>DEST DLMO TARGET</text>
+      <line x1={padL} y1={y(0)} x2={W-padR} y2={y(0)} stroke={A_TOK.indigo} strokeDasharray="3 3" strokeWidth="0.8"/>
+      <text x={W-padR-2} y={y(0)-3} textAnchor="end" fontFamily={A_TOK.mono} fontSize="8" fill={A_TOK.indigo}>ORIGIN DLMO TARGET</text>
+      <path d={path} fill="none" stroke={A_TOK.ink} strokeWidth="1.6"/>
+      {points.map((p, i) => (
+        <g key={i} style={{cursor: p.deep ? "pointer" : "default"}} onClick={() => p.deep && onPointClick(p)}>
+          <circle cx={x(p.i)} cy={y(p.y)} r={p.isKey ? 5 : 3.2} fill={p.isKey ? A_TOK.vermil : A_TOK.paper} stroke={A_TOK.ink} strokeWidth="1.2"/>
+          {p.isKey && <text x={x(p.i)} y={y(p.y)-10} textAnchor="middle" fontFamily={A_TOK.mono} fontSize="9" fill={A_TOK.vermil} fontWeight="600">★</text>}
+        </g>
+      ))}
+      {points.map((p, i) => (
+        (i % 2 === 0 || p.isKey) && p.label ? (
+          <text key={i} x={x(p.i)} y={H-padB+12} textAnchor="middle" fontFamily={A_TOK.mono} fontSize="8" fill={A_TOK.inkMute}>
+            {p.label.split(" ")[0].slice(0,3)} {p.label.split(" ")[1] || ""}
+          </text>
+        ) : null
+      ))}
+      <text x={padL} y={H-6} fontFamily={A_TOK.mono} fontSize="8" letterSpacing="0.18em" fill={A_TOK.inkFade}>DLMO OFFSET (HOURS) ↑   ·   {points.length}-DAY TRIP →</text>
+    </svg>
+  );
+};
 
-function renderHorizon(activeIdx) {
-  horizon.innerHTML = '';
-  days.forEach((d, i) => {
-    const cls = ['h-day'];
-    if (i === activeIdx) cls.push('active');
-    if (i === TODAY_INDEX && activeIdx !== TODAY_INDEX) cls.push('today');
-    if (d.isKey) cls.push('key');
-    const star = d.isKey ? '<span class="star">★</span>' : '';
-    const dots = d.dots.map(c => `<span${c ? ` class="${c}"` : ''}></span>`).join('');
-    const div = document.createElement('div');
-    div.className = cls.join(' ');
-    div.innerHTML = `<div class="h-num">${d.num}</div><div class="h-label">${d.dayShort}</div>${star}<div class="dots">${dots}</div>`;
-    div.addEventListener('click', () => selectDay(i));
-    horizon.appendChild(div);
-  });
-}
+const DrawerA = ({ drawer, onClose, onJumpToNotebook }) => {
+  if (!drawer) return null;
+  const d = drawer.kind === "chart" ? drawer.point.deep : drawer.action.deep;
+  if (!d) return null;
+  const originLabel = drawer.kind === "chart" ? `chart · ${drawer.point.label}` : `from action · ${(drawer.action.t || "").split(" ")[0]}`;
+  return (
+    <div style={drA.scrim} onClick={onClose} role="dialog" aria-modal="true">
+      <div style={drA.sheet} onClick={e => e.stopPropagation()}>
+        <div style={drA.handle} />
+        <div style={drA.head}>
+          <div style={drA.kick}>{d.kicker}</div>
+          <button onClick={onClose} style={drA.close} aria-label="Close">×</button>
+        </div>
+        {d.deck && <div style={drA.deck}>{d.deck}</div>}
+        {d.body && <div style={drA.body}>{d.body.map((p, i) => <p key={i} style={drA.p}>{p}</p>)}</div>}
+        {d.cite && d.cite.length > 0 && (
+          <div style={drA.refs}>
+            <div style={drA.refsKick}>REFERENCES</div>
+            {d.cite.map((c, i) => <div key={i} style={drA.ref}>▸ {c}</div>)}
+          </div>
+        )}
+        <div style={drA.foot}>
+          <span style={drA.footL}>{originLabel}</span>
+          <button onClick={onJumpToNotebook} style={drA.footR}>📖 Read in Notebook ↗</button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
-function defaultPillText() {
-  if (tripState.status === 'today') return 'Today · ' + days[tripState.idx].phaseLabel.split('·')[0].trim();
-  if (tripState.status === 'before') {
-    const n = tripState.daysUntil;
-    return 'Trip starts in ' + n + ' day' + (n === 1 ? '' : 's');
-  }
-  // after
-  const n = tripState.daysAgo;
-  return 'Trip ended ' + n + ' day' + (n === 1 ? '' : 's') + ' ago';
-}
+// =========================================================================
+// THEME D — Calm Spa Ritual
+// =========================================================================
 
-function selectDay(idx) {
-  renderFocus(idx);
-  renderHorizon(idx);
-  if (idx === DEFAULT_INDEX) {
-    // We're showing the default day
-    statusPill.textContent = defaultPillText();
-    statusPill.classList.remove('viewing');
-    backPill.classList.remove('shown');
-    if (tripState.status === 'today') summaryCard.classList.remove('hidden');
-    else summaryCard.classList.add('hidden');
-  } else {
-    statusPill.textContent = 'Viewing · ' + days[idx].dayShort.replace(' ✈','') + ' ' + days[idx].num + ' May';
-    statusPill.classList.add('viewing');
-    backPill.textContent = tripState.status === 'today' ? '← Back to today' : '← Back';
-    backPill.classList.add('shown');
-    summaryCard.classList.add('hidden');
-  }
-}
-function showToday() { selectDay(DEFAULT_INDEX); }
-selectDay(DEFAULT_INDEX);
+const PrototypeD = (P) => (
+  <div style={{ width:"100%", minHeight:"100vh", background:D_TOK.paper, color:D_TOK.ink, fontFamily:D_TOK.sans, position:"relative" }}>
+    {P.view === "plan" ? <PlanD {...P} /> : <NotebookD {...P} />}
+    <DrawerD drawer={P.drawer} onClose={() => P.setDrawer(null)}
+      onJumpToNotebook={() => { P.setView("notebook"); P.setDrawer(null); }} />
+    <ThemeSwitch theme={P.theme} setTheme={P.setTheme} variant="D" />
+  </div>
+);
+
+const PlanD = ({ dayIdx, setDayIdx, doneIds, toggleDone, expandedActionId, setExpandedActionId,
+  setDrawer, setView, tripActive, computedTodayIdx }) => {
+  const day = TRIP.days[dayIdx];
+  const isShownDayToday = dayIdx === computedTodayIdx && tripActive;
+  const offset = dayIdx - computedTodayIdx;
+  const meta = TRIP.meta || {};
+  const intro = isShownDayToday ? (day.summary || "").split(".")[0] + "." :
+    (tripActive && offset === 1) ? "tomorrow's quiet shape." :
+    (tripActive && offset === -1) ? "yesterday, in retrospect." :
+    day.label.toLowerCase();
+  const ritualTitle = isShownDayToday
+    ? (day.travel ? "Today, you fly home." : "Today, gently.")
+    : (tripActive && offset === 1) ? "Tomorrow's invitation."
+    : day.label;
+  return (
+    <div style={planD.frame}>
+      <div style={planD.scroll}>
+        <div style={planD.head}>
+          <div style={planD.topRow}>
+            <button onClick={() => dayIdx > 0 && setDayIdx(dayIdx - 1)} disabled={dayIdx === 0}
+              style={{...planD.nav, opacity: dayIdx === 0 ? 0.25 : 1}}>←</button>
+            <div style={planD.kicker}>your {(day.dow || "").toLowerCase()} ritual</div>
+            <button onClick={() => dayIdx < TRIP.days.length - 1 && setDayIdx(dayIdx + 1)} disabled={dayIdx === TRIP.days.length - 1}
+              style={{...planD.nav, opacity: dayIdx === TRIP.days.length - 1 ? 0.25 : 1}}>→</button>
+          </div>
+          <h1 style={planD.h1}>{ritualTitle}</h1>
+          <p style={planD.subhead}>{intro}</p>
+          <div style={planD.metaWrap}>
+            {isShownDayToday && meta.nowHHMM && (<>
+              <div>
+                <div style={planD.metaK}>now</div>
+                <div style={planD.metaV}>{meta.nowHHMM.replace(":", " : ")}</div>
+              </div>
+              {meta.next && (<>
+                <div style={planD.metaSpacer} />
+                <div>
+                  <div style={planD.metaK}>next</div>
+                  <div style={planD.metaV}>{(meta.next.time || "").split(" ")[0].replace(":", " : ")}</div>
+                  <div style={planD.metaN}>{(meta.next.label || "").toLowerCase()}{Number.isInteger(meta.next.inMin) ? `, in ${meta.next.inMin} min` : ""}</div>
+                </div>
+              </>)}
+            </>)}
+            <button onClick={() => setView("notebook")} style={planD.notebookLink}>read the why →</button>
+          </div>
+        </div>
+        <div style={planD.list}>
+          {day.actions.map((a, i) => {
+            const aid = a.id || `${day.i}-${i}`;
+            const done = doneIds.includes(aid) || a.done;
+            const expanded = expandedActionId === aid;
+            return (<ActionRowD
+              key={aid} action={a} aid={aid} done={done} expanded={expanded}
+              onToggleDone={() => toggleDone(aid)}
+              onActivate={() => {
+                if (a.deep) setDrawer({ kind:"action", action:a });
+                else if (a.why) setExpandedActionId(expanded ? null : aid);
+              }}
+            />);
+          })}
+        </div>
+        <HorizonD dayIdx={dayIdx} setDayIdx={setDayIdx} computedTodayIdx={computedTodayIdx} />
+        <div style={planD.foot}>
+          <span style={planD.footMeta}>plan{meta.planId ? " · " + meta.planId.toLowerCase() : ""}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ActionRowD = ({ action, aid, done, expanded, onToggleDone, onActivate }) => {
+  const a = action;
+  const showWhy = a.why && (a.key || expanded);
+  const interactive = !!(a.why || a.deep);
+  const dotStyle = { ...planD.dotInner,
+    ...(done ? planD.dotDone : a.key ? planD.dotKey : a.next ? planD.dotNext : {})
+  };
+  const tz = tzLabelD(a.t);
+  const handleRow = () => { if (interactive && !done) onActivate(); };
+  return (
+    <div
+      style={{...planD.row, ...(done ? planD.rowDone : {}), cursor: interactive && !done ? "pointer" : "default"}}
+      onClick={handleRow}
+      role={interactive ? "button" : undefined}
+      tabIndex={interactive ? 0 : -1}
+      onKeyDown={interactive ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleRow(); } } : undefined}
+    >
+      <button
+        onClick={(e) => { e.stopPropagation(); onToggleDone(); }}
+        style={planD.dot} aria-label={done ? "Mark not done" : "Mark done"}
+      >
+        <span style={dotStyle} />
+      </button>
+      <div>
+        <div style={planD.timeRow}>
+          <span style={planD.t}>{fmtTimeD(a.t)}</span>
+          {tz && <span style={planD.tz}>{tz}</span>}
+          {a.key && <span style={planD.keyTag}>· a still moment ·</span>}
+          {a.next && !done && <span style={{...planD.keyTag, color:D_TOK.ink}}>· next ·</span>}
+        </div>
+        <div style={{...planD.h, ...(done ? planD.hDone : {})}}>
+          {cleanHD(a.h)}
+          {a.deep && <span style={planD.openMark}>  ↗</span>}
+        </div>
+        {showWhy && !done && <div style={planD.why}>{a.why}</div>}
+      </div>
+    </div>
+  );
+};
+
+const HorizonD = ({ dayIdx, setDayIdx, computedTodayIdx }) => (
+  <div style={hzD.wrap}>
+    <div style={hzD.kicker}>{TRIP.days.length === 12 ? "twelve" : TRIP.days.length} days, gently</div>
+    <div style={hzD.row}>
+      {TRIP.days.map((d, i) => {
+        const isCurrent = i === dayIdx;
+        const isToday = i === computedTodayIdx;
+        return (<button key={i} onClick={() => setDayIdx(i)}
+          style={{...hzD.cell, ...(isCurrent ? hzD.cellCurrent : {})}}>
+          <span style={{...hzD.dotH,
+            ...(isToday ? hzD.dotHToday : {}),
+            ...(d.isKey ? hzD.dotHKey : {}),
+            ...(isCurrent ? hzD.dotHCurrent : {})
+          }} />
+          <span style={{...hzD.n, ...(isCurrent ? hzD.nCurrent : {})}}>{d.n}</span>
+        </button>);
+      })}
+    </div>
+  </div>
+);
+
+const NotebookD = ({ setDrawer, setView }) => {
+  const N = TRIP.notebook || {};
+  const meta = TRIP.meta || {};
+  const masthead = N.masthead || {};
+  return (
+    <div style={nbD.frame}>
+      <div style={nbD.bar}>
+        <div style={nbD.barKick}>the why{meta.planId ? " · " + meta.planId.toLowerCase() : ""}</div>
+        <button onClick={() => setView("plan")} style={nbD.barBtn}>← back to today</button>
+      </div>
+      <div style={nbD.scroll}>
+        {(masthead.title || masthead.kicker) && (
+          <div style={nbD.masthead}>
+            <div style={nbD.mhKick}>a slow briefing</div>
+            {(masthead.title || masthead.titleItalic) && (
+              <h1 style={nbD.h1}>
+                {masthead.title}
+                {masthead.titleItalic && <><br/><em style={nbD.h1Em}>{masthead.titleItalic}</em></>}
+              </h1>
+            )}
+            {masthead.deck && <p style={nbD.deck}>{masthead.deck}</p>}
+            {N.metadata && N.metadata.length > 0 && (<>
+              <div style={nbD.dRule} />
+              <div style={nbD.metaCol}>
+                {N.metadata.map((m, i) => (
+                  <div key={i} style={nbD.metaLine}>
+                    <span style={nbD.metaK}>{m.k.toLowerCase()}</span>
+                    <span style={nbD.metaV}>{m.v}</span>
+                  </div>
+                ))}
+              </div>
+            </>)}
+          </div>
+        )}
+        {N.chartPoints && N.chartPoints.length > 0 && (
+          <SectionD kicker="i · the convergence" title="how the week unfolded">
+            <div style={nbD.chartWrap}>
+              <ConvergenceChartD points={N.chartPoints} onPointClick={(p) => p.deep && setDrawer({ kind:"chart", point:p })} />
+            </div>
+            {N.chartCaption && <p style={nbD.caption}>{(N.chartCaption || "").toLowerCase()}</p>}
+          </SectionD>
+        )}
+        {N.garmin && N.garmin.length > 0 && (
+          <SectionD kicker="ii · the wearable" title="what your week said quietly">
+            <div>
+              {N.garmin.map((g, i) => (
+                <div key={i} style={nbD.tRow}>
+                  <div style={nbD.tMetric}>{g.metric.toLowerCase()}</div>
+                  <div style={nbD.tReading}>{g.reading}</div>
+                  <div style={nbD.tRead}>{g.read}</div>
+                </div>
+              ))}
+            </div>
+          </SectionD>
+        )}
+        {N.methodology && N.methodology.length > 0 && (
+          <SectionD kicker="iii · the method" title="how this plan thinks">
+            {N.methodology.map((p, i) => <p key={i} style={nbD.prose}>{p}</p>)}
+          </SectionD>
+        )}
+        {N.refs && N.refs.length > 0 && (
+          <SectionD kicker="iv · further reading" title="">
+            {N.refs.map((r, i) => <div key={i} style={nbD.ref}>· {r}</div>)}
+          </SectionD>
+        )}
+        <div style={nbD.colophon}>
+          {meta.planId && <span>{meta.planId.toLowerCase()}</span>}
+          <span>· not medical advice ·</span>
+          <span>be kind to yourself</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const SectionD = ({ kicker, title, children }) => (
+  <div style={secD.wrap}>
+    <div style={secD.kicker}>{kicker}</div>
+    {title && <h2 style={secD.h}>{title}</h2>}
+    <div style={secD.dRule} />
+    {children}
+  </div>
+);
+
+const ConvergenceChartD = ({ points, onPointClick }) => {
+  const W = 376, H = 220, padL = 38, padR = 12, padT = 18, padB = 38;
+  const innerW = W - padL - padR, innerH = H - padT - padB;
+  const xMax = Math.max(1, points.length - 1);
+  const yMax = Math.max(9, Math.ceil(Math.max(...points.map(p => p.y))));
+  const x = (i) => padL + (i / xMax) * innerW;
+  const y = (v) => padT + innerH - (v / yMax) * innerH;
+  const path = points.map((p, i) => `${i === 0 ? "M" : "L"} ${x(p.i)} ${y(p.y)}`).join(" ");
+  const yTicks = [0, Math.round(yMax/3), Math.round(2*yMax/3), yMax];
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%", height:"auto", display:"block"}}>
+      <line x1={padL} y1={padT} x2={padL} y2={H-padB} stroke={D_TOK.inkMute} strokeWidth="0.6"/>
+      <line x1={padL} y1={H-padB} x2={W-padR} y2={H-padB} stroke={D_TOK.inkMute} strokeWidth="0.6"/>
+      {yTicks.map((v, i) => (
+        <text key={i} x={padL-6} y={y(v)+3} textAnchor="end" fontFamily={D_TOK.sans} fontSize="9" fill={D_TOK.inkMute}>+{v}h</text>
+      ))}
+      <line x1={padL} y1={y(yMax)} x2={W-padR} y2={y(yMax)} stroke={D_TOK.rose} strokeDasharray="2 4" strokeWidth="0.6" opacity="0.6"/>
+      <text x={W-padR-2} y={y(yMax)-3} textAnchor="end" fontFamily={D_TOK.sans} fontSize="8" fill={D_TOK.rose} letterSpacing="0.10em">destination</text>
+      <line x1={padL} y1={y(0)} x2={W-padR} y2={y(0)} stroke={D_TOK.rose} strokeDasharray="2 4" strokeWidth="0.6" opacity="0.6"/>
+      <text x={W-padR-2} y={y(0)-3} textAnchor="end" fontFamily={D_TOK.sans} fontSize="8" fill={D_TOK.rose} letterSpacing="0.10em">origin</text>
+      <path d={path} fill="none" stroke={D_TOK.ink} strokeWidth="1.2"/>
+      {points.map((p, i) => (
+        <g key={i} style={{cursor: p.deep ? "pointer" : "default"}} onClick={() => p.deep && onPointClick(p)}>
+          <circle cx={x(p.i)} cy={y(p.y)} r={p.isKey ? 5 : 2.6}
+            fill={p.isKey ? D_TOK.rose : D_TOK.paperHi}
+            stroke={p.isKey ? D_TOK.rose : D_TOK.inkMute} strokeWidth="1"/>
+          {p.isKey && <circle cx={x(p.i)} cy={y(p.y)} r="9" fill="none" stroke={D_TOK.rose} strokeWidth="0.6" opacity="0.4"/>}
+        </g>
+      ))}
+      {points.map((p, i) => (
+        (i % 2 === 0 || p.isKey) && p.label ? (
+          <text key={i} x={x(p.i)} y={H-padB+12} textAnchor="middle" fontFamily={D_TOK.sans} fontSize="8" fill={D_TOK.inkMute} letterSpacing="0.06em">
+            {p.label.split(" ")[0].toLowerCase()} {p.label.split(" ")[1] || ""}
+          </text>
+        ) : null
+      ))}
+    </svg>
+  );
+};
+
+const DrawerD = ({ drawer, onClose, onJumpToNotebook }) => {
+  if (!drawer) return null;
+  const d = drawer.kind === "chart" ? drawer.point.deep : drawer.action.deep;
+  if (!d) return null;
+  return (
+    <div style={drD.scrim} onClick={onClose} role="dialog" aria-modal="true">
+      <div style={drD.sheet} onClick={e => e.stopPropagation()}>
+        <div style={drD.handle} />
+        {d.kicker && <div style={drD.kick}>{d.kicker.toLowerCase()}</div>}
+        {d.deck && <h2 style={drD.deck}>{d.deck}</h2>}
+        <div style={drD.dRule} />
+        {d.body && <div>{d.body.map((p, i) => <p key={i} style={drD.p}>{p}</p>)}</div>}
+        {d.cite && d.cite.length > 0 && (<>
+          <div style={drD.dRule} />
+          <div style={drD.refsKick}>further reading</div>
+          {d.cite.map((c, i) => <div key={i} style={drD.ref}>· {c}</div>)}
+        </>)}
+        <div style={drD.foot}>
+          <button onClick={onClose} style={drD.footL}>close</button>
+          <button onClick={onJumpToNotebook} style={drD.footR}>read in notebook  →</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── Theme switch (floating pill, present in both views) ────────────────
+const ThemeSwitch = ({ theme, setTheme, variant }) => {
+  const next = theme === "A" ? "D" : "A";
+  const label = next === "A" ? "Editorial" : "Calm";
+  const tok = variant === "A" ? A_TOK : D_TOK;
+  const bg = variant === "A" ? tok.paperHi : tok.paperHi;
+  const fg = variant === "A" ? tok.ink : tok.ink;
+  const bd = variant === "A" ? tok.rule : "rgba(31,51,40,0.22)";
+  return (
+    <button
+      onClick={() => setTheme(next)}
+      style={{
+        position: "fixed",
+        bottom: "calc(env(safe-area-inset-bottom, 0px) + 14px)",
+        left: "50%",
+        transform: "translateX(-50%)",
+        zIndex: 90,
+        background: bg, color: fg,
+        border: `1px solid ${bd}`,
+        padding: "7px 14px",
+        fontFamily: variant === "A" ? A_TOK.mono : D_TOK.sans,
+        fontSize: 10.5,
+        letterSpacing: variant === "A" ? "0.18em" : "0.20em",
+        textTransform: variant === "A" ? "uppercase" : "lowercase",
+        borderRadius: 99,
+        cursor: "pointer",
+        boxShadow: "0 6px 16px -8px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.06)",
+        backdropFilter: "saturate(110%)"
+      }}
+    >
+      {variant === "A" ? `→ ${label}` : `→ ${label.toLowerCase()}`}
+    </button>
+  );
+};
+
+// =========================================================================
+// TOKENS + STYLES
+// =========================================================================
+
+const A_TOK = {
+  paper:"#F4ECD8", paperHi:"#FAF4E2",
+  ink:"#14110D", inkSoft:"#3d362d", inkMute:"#6b6358", inkFade:"#9a9082",
+  rule:"rgba(20,17,13,0.18)", ruleSoft:"rgba(20,17,13,0.08)",
+  vermil:"#b3441e", vermilSoft:"rgba(179,68,30,0.14)",
+  indigo:"#26416b",
+  serif:'"Source Serif 4", Georgia, serif',
+  sans: '"Inter Tight", system-ui, sans-serif',
+  mono: '"JetBrains Mono", ui-monospace, monospace'
+};
+
+const D_TOK = {
+  paper:"#E8EFE6", paperHi:"#F5F2EB",
+  ink:"#1F3328", inkSoft:"#3F5947", inkMute:"#6E8A78", inkFade:"#9DB0A2",
+  rule:"rgba(31,51,40,0.18)", ruleSoft:"rgba(31,51,40,0.10)",
+  rose:"#C97D6A", roseSoft:"rgba(201,125,106,0.18)",
+  serif:'Fraunces, "Source Serif 4", Georgia, serif',
+  sans: '"Inter Tight", system-ui, sans-serif'
+};
+
+const planA = {
+  frame: { display:"flex", flexDirection:"column", minHeight:"100vh" },
+  head: { padding:"calc(env(safe-area-inset-top, 0px) + 18px) 18px 12px", borderBottom:`1px solid ${A_TOK.ink}`, background:A_TOK.paper, position:"sticky", top:0, zIndex:10 },
+  headRow1: { display:"flex", justifyContent:"space-between", alignItems:"center" },
+  kicker: { fontFamily:A_TOK.mono, fontSize:9.5, letterSpacing:"0.18em", color:A_TOK.inkMute },
+  tabBtn: { background:A_TOK.ink, color:A_TOK.paper, border:"none", padding:"5px 10px", fontFamily:A_TOK.mono, fontSize:10, letterSpacing:"0.16em", textTransform:"uppercase", cursor:"pointer" },
+  dayLine: { display:"grid", gridTemplateColumns:"24px 1fr 24px", alignItems:"center", marginTop:8, gap:6 },
+  navArrow: { background:"transparent", border:"none", fontSize:22, fontFamily:A_TOK.serif, color:A_TOK.ink, cursor:"pointer", padding:0, lineHeight:1 },
+  dayMain: { textAlign:"center" },
+  dayKick: { fontFamily:A_TOK.mono, fontSize:8.5, letterSpacing:"0.20em", color:A_TOK.inkMute, marginBottom:2 },
+  dayTitle: { fontFamily:A_TOK.serif, fontSize:26, fontWeight:600, letterSpacing:"-0.01em", lineHeight:1.1 },
+  daySub: { fontFamily:A_TOK.serif, fontStyle:"italic", fontSize:12.5, color:A_TOK.inkMute, marginTop:2 },
+  nowRow: { marginTop:10, paddingTop:8, borderTop:`1px dotted ${A_TOK.rule}`, display:"flex", alignItems:"center", gap:7, whiteSpace:"nowrap", overflow:"hidden" },
+  nowDot: { width:7, height:7, borderRadius:"50%", background:A_TOK.vermil, flex:"0 0 auto" },
+  nowTime: { fontFamily:A_TOK.mono, fontSize:10, letterSpacing:"0.18em", color:A_TOK.vermil, fontWeight:600, flex:"0 0 auto" },
+  nowSep: { color:A_TOK.inkFade, flex:"0 0 auto" },
+  nowNext: { fontFamily:A_TOK.serif, fontStyle:"italic", fontSize:12.5, color:A_TOK.inkSoft, overflow:"hidden", textOverflow:"ellipsis" },
+  scroll: { flex:"1 1 auto", paddingBottom:60 },
+  morning: { margin:"12px 18px 0", padding:"12px 14px", background:A_TOK.paperHi, border:`1px solid ${A_TOK.ink}` },
+  morningKick: { display:"flex", justifyContent:"space-between", alignItems:"center", fontFamily:A_TOK.mono, fontSize:9, letterSpacing:"0.20em", color:A_TOK.vermil, fontWeight:600 },
+  morningClose: { background:"transparent", border:"none", color:A_TOK.inkMute, fontSize:18, cursor:"pointer", lineHeight:1, padding:0 },
+  morningHead: { fontFamily:A_TOK.serif, fontSize:16, fontWeight:500, fontStyle:"italic", lineHeight:1.25, marginTop:6, color:A_TOK.ink },
+  morningBody: { fontFamily:A_TOK.serif, fontSize:12.5, lineHeight:1.5, color:A_TOK.inkSoft, margin:"8px 0 10px" },
+  morningGrid: { display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, paddingTop:8, borderTop:`1px dotted ${A_TOK.rule}` },
+  morningK: { fontFamily:A_TOK.mono, fontSize:7.5, letterSpacing:"0.18em", color:A_TOK.inkFade },
+  morningV: { fontFamily:A_TOK.mono, fontSize:12, fontWeight:600, color:A_TOK.ink, marginTop:2 },
+  morningN: { fontFamily:A_TOK.serif, fontStyle:"italic", fontSize:10.5, color:A_TOK.inkMute, marginTop:1 },
+  listHead: { padding:"14px 18px 0 36px", display:"flex", justifyContent:"space-between", alignItems:"center" },
+  listKick: { fontFamily:A_TOK.mono, fontSize:9, letterSpacing:"0.20em", color:A_TOK.inkFade },
+  modeRow: { display:"flex", alignItems:"center", gap:4 },
+  modeBtn: { background:"transparent", border:`1px solid ${A_TOK.rule}`, padding:"2px 8px", fontFamily:A_TOK.mono, fontSize:9, letterSpacing:"0.14em", textTransform:"uppercase", cursor:"pointer", color:A_TOK.inkMute },
+  modeBtnOn: { background:A_TOK.ink, color:A_TOK.paper, borderColor:A_TOK.ink },
+  list: { padding:"8px 18px 18px 36px" },
+  foot: { padding:"16px 18px 24px", borderTop:`1px solid ${A_TOK.rule}` },
+  footMeta: { fontFamily:A_TOK.mono, fontSize:9, letterSpacing:"0.18em", color:A_TOK.inkFade }
+};
+
+const arA = {
+  wrap: { display:"grid", gridTemplateColumns:"20px 70px 22px 1fr", columnGap:8, alignItems:"baseline", padding:"12px 0", borderBottom:`1px solid ${A_TOK.ruleSoft}`, position:"relative", borderRadius:2, transition:"background 0.12s" },
+  wrapDone: { opacity:0.42 },
+  keyTab: { position:"absolute", left:-16, top:6, bottom:6, width:3, background:A_TOK.vermil },
+  checkbox: { width:16, height:16, marginTop:2, border:`1px solid ${A_TOK.rule}`, background:A_TOK.paper, borderRadius:0, cursor:"pointer", padding:0, display:"flex", alignItems:"center", justifyContent:"center" },
+  t: { fontFamily:A_TOK.mono, fontSize:11.5, fontWeight:500, color:A_TOK.ink, fontVariantNumeric:"tabular-nums", textAlign:"right", letterSpacing:"0.02em", paddingTop:2 },
+  glyph: { fontFamily:A_TOK.serif, fontSize:12, color:A_TOK.inkMute, textAlign:"center", lineHeight:1, width:22, height:22, borderRadius:"50%", border:`1px solid ${A_TOK.rule}`, display:"flex", alignItems:"center", justifyContent:"center", background:A_TOK.paper },
+  h: { fontFamily:A_TOK.serif, fontSize:15, fontWeight:500, lineHeight:1.32, letterSpacing:"-0.005em", color:A_TOK.ink },
+  hDone: { textDecoration:"line-through", textDecorationColor:A_TOK.inkFade, color:A_TOK.inkMute },
+  openMark: { color:A_TOK.inkFade, fontFamily:A_TOK.mono, fontSize:11, marginLeft:4 },
+  why: { marginTop:6, fontFamily:A_TOK.serif, fontStyle:"italic", fontSize:12.5, color:A_TOK.inkMute, lineHeight:1.5 },
+  nextChip: { marginTop:6, fontFamily:A_TOK.mono, fontSize:8.5, letterSpacing:"0.18em", color:A_TOK.vermil, fontWeight:600 }
+};
+
+const hsA = {
+  wrap: { padding:"14px 18px 18px", borderTop:`1px solid ${A_TOK.ink}` },
+  kicker: { fontFamily:A_TOK.mono, fontSize:9, letterSpacing:"0.20em", color:A_TOK.inkMute, marginBottom:8 },
+  grid: { display:"grid", gap:0, border:`1px solid ${A_TOK.rule}` },
+  cell: { padding:"5px 0 6px", textAlign:"center", borderRight:`1px solid ${A_TOK.rule}`, fontFamily:A_TOK.mono, background:"transparent", cursor:"pointer", color:A_TOK.ink, border:"none", borderRight:`1px solid ${A_TOK.rule}` },
+  cellCurrent: { background:A_TOK.ink, color:A_TOK.paper },
+  cellToday: { background:A_TOK.vermilSoft, boxShadow:`inset 0 -2px 0 ${A_TOK.vermil}` },
+  cellKey: { background:"rgba(20,17,13,0.04)" },
+  dow: { fontSize:8, color:A_TOK.inkFade, letterSpacing:"0.1em" },
+  n: { fontSize:13, fontWeight:600, color:"inherit", marginTop:1 },
+  tag: { fontSize:9, marginTop:2 }
+};
+
+const nbA = {
+  frame: { display:"flex", flexDirection:"column", minHeight:"100vh", background:A_TOK.paper },
+  bar: { padding:"calc(env(safe-area-inset-top, 0px) + 18px) 18px 10px", background:A_TOK.ink, color:A_TOK.paper, display:"flex", justifyContent:"space-between", alignItems:"center", position:"sticky", top:0, zIndex:10 },
+  barKicker: { fontFamily:A_TOK.mono, fontSize:10, letterSpacing:"0.20em" },
+  barBtn: { background:A_TOK.paper, color:A_TOK.ink, border:"none", padding:"5px 10px", fontFamily:A_TOK.mono, fontSize:10, letterSpacing:"0.16em", textTransform:"uppercase", cursor:"pointer" },
+  scroll: { flex:"1 1 auto", paddingBottom:60 },
+  masthead: { padding:"26px 18px 22px" },
+  mhKicker: { fontFamily:A_TOK.mono, fontSize:9, letterSpacing:"0.22em", color:A_TOK.vermil, fontWeight:600 },
+  h1: { margin:"12px 0 10px", fontFamily:A_TOK.serif, fontSize:38, fontWeight:700, lineHeight:1.02, letterSpacing:"-0.02em", color:A_TOK.ink },
+  h1Em: { fontStyle:"italic", fontWeight:500 },
+  deck: { margin:"8px 0 18px", fontFamily:A_TOK.serif, fontSize:14, fontStyle:"italic", lineHeight:1.5, color:A_TOK.inkSoft, maxWidth:360 },
+  metaRow: { display:"grid", borderTop:`1px solid ${A_TOK.ink}`, borderBottom:`1px solid ${A_TOK.ink}`, padding:"8px 0", gap:6, marginTop:6 },
+  metaK: { fontFamily:A_TOK.mono, fontSize:7.5, letterSpacing:"0.20em", color:A_TOK.inkFade, marginBottom:3 },
+  metaV: { fontFamily:A_TOK.serif, fontSize:11, color:A_TOK.ink, lineHeight:1.25 },
+  chartWrap: { background:A_TOK.paperHi, border:`1px solid ${A_TOK.rule}`, padding:8 },
+  caption: { margin:"12px 0 0", fontFamily:A_TOK.serif, fontSize:12.5, lineHeight:1.55, color:A_TOK.inkSoft },
+  dropcap: { fontFamily:A_TOK.serif, fontSize:30, fontWeight:700, float:"left", lineHeight:0.9, paddingRight:6, paddingTop:2, color:A_TOK.ink },
+  table: { borderTop:`1px solid ${A_TOK.ink}`, borderBottom:`1px solid ${A_TOK.ink}` },
+  tHead: { display:"grid", gridTemplateColumns:"1.4fr 0.9fr 1.7fr", padding:"6px 0", borderBottom:`1px solid ${A_TOK.rule}`, fontFamily:A_TOK.mono, fontSize:8.5, letterSpacing:"0.20em", color:A_TOK.inkFade, gap:8 },
+  tRow: { display:"grid", gridTemplateColumns:"1.4fr 0.9fr 1.7fr", padding:"8px 0", borderBottom:`1px dotted ${A_TOK.rule}`, gap:8, alignItems:"baseline" },
+  tMetric: { fontFamily:A_TOK.serif, fontSize:12, color:A_TOK.ink, fontWeight:500 },
+  tReading: { fontFamily:A_TOK.mono, fontSize:12, color:A_TOK.ink, fontVariantNumeric:"tabular-nums" },
+  tRead: { fontFamily:A_TOK.serif, fontStyle:"italic", fontSize:12, color:A_TOK.inkMute, lineHeight:1.45 },
+  prose: { margin:"0 0 12px", fontFamily:A_TOK.serif, fontSize:13, lineHeight:1.55, color:A_TOK.inkSoft },
+  ref: { fontFamily:A_TOK.mono, fontSize:10, color:A_TOK.inkSoft, lineHeight:1.7, padding:"2px 0" },
+  colophon: { padding:"20px 18px 26px", display:"flex", justifyContent:"space-between", flexWrap:"wrap", gap:6, borderTop:`1px solid ${A_TOK.ink}`, fontFamily:A_TOK.mono, fontSize:8.5, letterSpacing:"0.18em", color:A_TOK.inkFade, marginTop:18 }
+};
+
+const secA = {
+  wrap: { padding:"26px 18px 4px", borderTop:`1px solid ${A_TOK.ink}` },
+  head: { marginBottom:14, display:"flex", alignItems:"baseline", gap:10 },
+  roman: { fontFamily:A_TOK.mono, fontSize:9, letterSpacing:"0.20em", color:A_TOK.vermil, fontWeight:600 },
+  h: { margin:0, fontFamily:A_TOK.serif, fontSize:22, fontWeight:600, letterSpacing:"-0.01em", color:A_TOK.ink }
+};
+
+const drA = {
+  scrim: { position:"fixed", inset:0, background:"rgba(20,17,13,0.42)", zIndex:100, display:"flex", alignItems:"flex-end", justifyContent:"center" },
+  sheet: { width:"100%", maxWidth:460, maxHeight:"82vh", background:A_TOK.paperHi, borderTop:`2px solid ${A_TOK.ink}`, padding:"10px 18px calc(env(safe-area-inset-bottom, 0px) + 18px)", overflowY:"auto", boxSizing:"border-box" },
+  handle: { width:36, height:3, background:A_TOK.rule, margin:"2px auto 12px", borderRadius:2 },
+  head: { display:"flex", justifyContent:"space-between", alignItems:"center" },
+  kick: { fontFamily:A_TOK.mono, fontSize:9.5, letterSpacing:"0.20em", color:A_TOK.vermil, fontWeight:600 },
+  close: { background:"transparent", border:"none", fontSize:22, color:A_TOK.ink, cursor:"pointer", lineHeight:1, padding:0, fontFamily:A_TOK.serif },
+  deck: { fontFamily:A_TOK.serif, fontSize:22, fontWeight:500, fontStyle:"italic", lineHeight:1.2, letterSpacing:"-0.01em", marginTop:8, color:A_TOK.ink },
+  body: { marginTop:14 },
+  p: { fontFamily:A_TOK.serif, fontSize:14, lineHeight:1.55, color:A_TOK.inkSoft, margin:"0 0 12px" },
+  refs: { marginTop:8, paddingTop:12, borderTop:`1px dotted ${A_TOK.rule}` },
+  refsKick: { fontFamily:A_TOK.mono, fontSize:9, letterSpacing:"0.20em", color:A_TOK.inkMute, marginBottom:6 },
+  ref: { fontFamily:A_TOK.mono, fontSize:10.5, color:A_TOK.inkSoft, lineHeight:1.55 },
+  foot: { display:"flex", justifyContent:"space-between", alignItems:"center", marginTop:14, paddingTop:10, borderTop:`1px solid ${A_TOK.rule}` },
+  footL: { fontFamily:A_TOK.mono, fontSize:9, letterSpacing:"0.18em", color:A_TOK.inkFade },
+  footR: { background:"transparent", border:"none", padding:0, fontFamily:A_TOK.mono, fontSize:9.5, letterSpacing:"0.18em", color:A_TOK.ink, textDecoration:"underline", textUnderlineOffset:3, cursor:"pointer" }
+};
+
+const planD = {
+  frame: { display:"flex", flexDirection:"column", minHeight:"100vh" },
+  scroll: { flex:"1 1 auto", paddingBottom:60 },
+  head: { padding:"calc(env(safe-area-inset-top, 0px) + 24px) 28px 24px" },
+  topRow: { display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 },
+  nav: { background:"transparent", border:"none", fontSize:18, color:D_TOK.inkMute, cursor:"pointer", padding:4, lineHeight:1 },
+  kicker: { fontFamily:D_TOK.sans, fontSize:10, letterSpacing:"0.30em", color:D_TOK.inkMute, textTransform:"lowercase", fontWeight:500 },
+  h1: { fontFamily:D_TOK.serif, fontSize:36, fontWeight:400, lineHeight:1.05, letterSpacing:"-0.02em", margin:"8px 0", color:D_TOK.ink, fontVariationSettings:"'opsz' 144, 'SOFT' 100" },
+  subhead: { fontFamily:D_TOK.serif, fontStyle:"italic", fontSize:15, lineHeight:1.5, color:D_TOK.inkSoft, margin:"0 0 24px", maxWidth:320, fontWeight:300 },
+  metaWrap: { display:"flex", alignItems:"flex-end", gap:20, paddingTop:8, flexWrap:"wrap" },
+  metaK: { fontSize:9.5, letterSpacing:"0.30em", color:D_TOK.inkMute, textTransform:"lowercase", fontWeight:500, lineHeight:1, marginBottom:8, fontFamily:D_TOK.sans },
+  metaV: { fontFamily:D_TOK.serif, fontSize:24, fontWeight:300, color:D_TOK.ink, letterSpacing:"0.04em", lineHeight:1.1 },
+  metaN: { fontFamily:D_TOK.serif, fontStyle:"italic", fontSize:11, color:D_TOK.inkMute, marginTop:4, lineHeight:1.3 },
+  metaSpacer: { width:1, height:32, background:"rgba(31,51,40,0.18)", marginBottom:4 },
+  notebookLink: { marginLeft:"auto", background:"transparent", border:"none", fontFamily:D_TOK.sans, fontSize:11, color:D_TOK.rose, letterSpacing:"0.10em", textTransform:"lowercase", paddingBottom:6, borderBottom:`1px solid ${D_TOK.rose}`, cursor:"pointer" },
+  list: { padding:"8px 28px 24px" },
+  row: { display:"grid", gridTemplateColumns:"20px 1fr", gap:18, padding:"24px 0", borderTop:`1px solid ${D_TOK.ruleSoft}`, transition:"background 0.12s" },
+  rowDone: { opacity:0.45 },
+  dot: { background:"transparent", border:"none", cursor:"pointer", padding:0, height:20, display:"flex", justifyContent:"center", paddingTop:8 },
+  dotInner: { width:7, height:7, borderRadius:"50%", background:D_TOK.inkFade, display:"block" },
+  dotDone: { background:D_TOK.inkFade, opacity:0.5 },
+  dotKey: { background:D_TOK.rose, boxShadow:`0 0 0 4px ${D_TOK.roseSoft}` },
+  dotNext: { background:D_TOK.ink },
+  timeRow: { display:"flex", alignItems:"baseline", gap:10, marginBottom:12, flexWrap:"wrap" },
+  t: { fontFamily:D_TOK.serif, fontSize:17, fontWeight:300, color:D_TOK.ink, letterSpacing:"0.02em", fontVariantNumeric:"tabular-nums", lineHeight:1.2 },
+  tz: { fontFamily:D_TOK.sans, fontSize:9.5, letterSpacing:"0.20em", color:D_TOK.inkMute, textTransform:"lowercase" },
+  keyTag: { fontFamily:D_TOK.serif, fontStyle:"italic", fontSize:11, color:D_TOK.rose, marginLeft:"auto" },
+  h: { fontFamily:D_TOK.serif, fontSize:17, lineHeight:1.35, color:D_TOK.ink, fontWeight:400, letterSpacing:"-0.005em" },
+  hDone: { textDecoration:"line-through", textDecorationColor:"rgba(31,51,40,0.4)", color:D_TOK.inkMute },
+  openMark: { color:D_TOK.inkMute, fontSize:13 },
+  why: { marginTop:10, fontFamily:D_TOK.serif, fontStyle:"italic", fontSize:13, lineHeight:1.65, color:D_TOK.inkSoft, fontWeight:300, paddingLeft:12, borderLeft:`1.5px solid ${D_TOK.rose}` },
+  foot: { padding:"20px 28px 30px", borderTop:`1px solid ${D_TOK.ruleSoft}` },
+  footMeta: { fontFamily:D_TOK.sans, fontSize:10, letterSpacing:"0.20em", color:D_TOK.inkFade, textTransform:"lowercase" }
+};
+
+const hzD = {
+  wrap: { padding:"16px 28px 14px", borderTop:`1px solid ${D_TOK.ruleSoft}` },
+  kicker: { fontFamily:D_TOK.sans, fontSize:10, letterSpacing:"0.30em", color:D_TOK.inkMute, marginBottom:14, textTransform:"lowercase" },
+  row: { display:"flex", justifyContent:"space-between", alignItems:"center", gap:4 },
+  cell: { background:"transparent", border:"none", padding:"4px 2px", display:"flex", flexDirection:"column", alignItems:"center", gap:6, cursor:"pointer", flex:1 },
+  cellCurrent: {},
+  dotH: { width:6, height:6, borderRadius:"50%", background:D_TOK.inkFade, opacity:0.4 },
+  dotHToday: { background:D_TOK.ink, opacity:1 },
+  dotHKey: { background:D_TOK.rose, opacity:1 },
+  dotHCurrent: { boxShadow:`0 0 0 3px ${D_TOK.roseSoft}` },
+  n: { fontFamily:D_TOK.serif, fontSize:12, color:D_TOK.inkMute, fontVariantNumeric:"tabular-nums", fontWeight:300 },
+  nCurrent: { color:D_TOK.ink, fontWeight:500 }
+};
+
+const nbD = {
+  frame: { display:"flex", flexDirection:"column", minHeight:"100vh", background:D_TOK.paperHi },
+  bar: { padding:"calc(env(safe-area-inset-top, 0px) + 18px) 28px 12px", background:D_TOK.paper, color:D_TOK.ink, display:"flex", justifyContent:"space-between", alignItems:"center", borderBottom:`1px solid ${D_TOK.ruleSoft}`, position:"sticky", top:0, zIndex:10 },
+  barKick: { fontFamily:D_TOK.sans, fontSize:10, letterSpacing:"0.30em", color:D_TOK.inkMute, textTransform:"lowercase" },
+  barBtn: { background:"transparent", border:"none", padding:0, fontFamily:D_TOK.sans, fontSize:11, color:D_TOK.rose, letterSpacing:"0.10em", textTransform:"lowercase", cursor:"pointer" },
+  scroll: { flex:"1 1 auto", paddingBottom:60 },
+  masthead: { padding:"32px 28px 28px" },
+  mhKick: { fontFamily:D_TOK.sans, fontSize:10, letterSpacing:"0.30em", color:D_TOK.rose, textTransform:"lowercase", fontWeight:500 },
+  h1: { margin:"16px 0 14px", fontFamily:D_TOK.serif, fontSize:36, fontWeight:400, lineHeight:1.05, letterSpacing:"-0.02em", color:D_TOK.ink, fontVariationSettings:"'opsz' 144, 'SOFT' 100" },
+  h1Em: { fontStyle:"italic", fontWeight:300 },
+  deck: { margin:"8px 0 18px", fontFamily:D_TOK.serif, fontStyle:"italic", fontSize:15, lineHeight:1.6, color:D_TOK.inkSoft, fontWeight:300, maxWidth:360 },
+  dRule: { width:32, height:1, background:D_TOK.rose, margin:"16px 0" },
+  metaCol: { display:"flex", flexDirection:"column", gap:6 },
+  metaLine: { display:"flex", gap:16, alignItems:"baseline" },
+  metaK: { fontFamily:D_TOK.sans, fontSize:9.5, letterSpacing:"0.30em", color:D_TOK.inkMute, textTransform:"lowercase", flex:"0 0 90px" },
+  metaV: { fontFamily:D_TOK.serif, fontSize:13, color:D_TOK.ink, fontWeight:300 },
+  chartWrap: { padding:"12px 0" },
+  caption: { margin:"12px 0 0", fontFamily:D_TOK.serif, fontStyle:"italic", fontSize:13, lineHeight:1.7, color:D_TOK.inkSoft, fontWeight:300 },
+  tRow: { display:"grid", gridTemplateColumns:"1.4fr 0.9fr 1.7fr", padding:"14px 0", borderBottom:`1px solid ${D_TOK.ruleSoft}`, gap:12, alignItems:"baseline" },
+  tMetric: { fontFamily:D_TOK.serif, fontSize:13, color:D_TOK.ink, fontWeight:400 },
+  tReading: { fontFamily:D_TOK.serif, fontSize:14, color:D_TOK.rose, fontVariantNumeric:"tabular-nums", fontWeight:300, fontVariationSettings:"'opsz' 144" },
+  tRead: { fontFamily:D_TOK.serif, fontStyle:"italic", fontSize:12, color:D_TOK.inkSoft, lineHeight:1.55, fontWeight:300 },
+  prose: { margin:"0 0 14px", fontFamily:D_TOK.serif, fontSize:14, lineHeight:1.75, color:D_TOK.inkSoft, fontWeight:300 },
+  ref: { fontFamily:D_TOK.serif, fontSize:12, color:D_TOK.inkSoft, lineHeight:1.7, padding:"3px 0", fontStyle:"italic", fontWeight:300 },
+  colophon: { padding:"28px 28px 36px", display:"flex", justifyContent:"space-between", flexWrap:"wrap", gap:6, fontFamily:D_TOK.sans, fontSize:9.5, letterSpacing:"0.20em", color:D_TOK.inkFade, textTransform:"lowercase", marginTop:18, borderTop:`1px solid ${D_TOK.ruleSoft}` }
+};
+
+const secD = {
+  wrap: { padding:"32px 28px 4px" },
+  kicker: { fontFamily:D_TOK.sans, fontSize:10, letterSpacing:"0.30em", color:D_TOK.rose, fontWeight:500, textTransform:"lowercase" },
+  h: { margin:"12px 0 0", fontFamily:D_TOK.serif, fontSize:22, fontWeight:400, letterSpacing:"-0.01em", color:D_TOK.ink, fontVariationSettings:"'opsz' 144" },
+  dRule: { width:32, height:1, background:D_TOK.rose, margin:"14px 0 18px" }
+};
+
+const drD = {
+  scrim: { position:"fixed", inset:0, background:"rgba(31,51,40,0.42)", zIndex:100, display:"flex", alignItems:"flex-end", justifyContent:"center" },
+  sheet: { width:"100%", maxWidth:460, maxHeight:"82vh", background:D_TOK.paperHi, padding:"12px 28px calc(env(safe-area-inset-bottom, 0px) + 24px)", overflowY:"auto", boxSizing:"border-box", borderTopLeftRadius:24, borderTopRightRadius:24 },
+  handle: { width:44, height:4, background:"rgba(31,51,40,0.22)", margin:"4px auto 18px", borderRadius:2 },
+  kick: { fontFamily:D_TOK.sans, fontSize:10, letterSpacing:"0.30em", color:D_TOK.rose, textTransform:"lowercase", fontWeight:500 },
+  deck: { fontFamily:D_TOK.serif, fontSize:26, fontWeight:300, lineHeight:1.15, letterSpacing:"-0.02em", margin:"10px 0 14px", color:D_TOK.ink, fontVariationSettings:"'opsz' 144, 'SOFT' 100" },
+  dRule: { width:32, height:1, background:D_TOK.rose, margin:"0 0 14px" },
+  p: { fontFamily:D_TOK.serif, fontSize:14, lineHeight:1.7, color:D_TOK.inkSoft, margin:"0 0 14px", fontWeight:300 },
+  refsKick: { fontFamily:D_TOK.sans, fontSize:10, letterSpacing:"0.30em", color:D_TOK.inkMute, textTransform:"lowercase", marginBottom:8 },
+  ref: { fontFamily:D_TOK.serif, fontSize:11.5, color:D_TOK.inkSoft, lineHeight:1.55, padding:"3px 0", fontStyle:"italic", fontWeight:300 },
+  foot: { display:"flex", justifyContent:"space-between", marginTop:18, paddingTop:14, borderTop:"1px solid rgba(31,51,40,0.12)" },
+  footL: { background:"transparent", border:"none", padding:0, fontFamily:D_TOK.sans, fontSize:11, color:D_TOK.inkMute, letterSpacing:"0.10em", textTransform:"lowercase", cursor:"pointer" },
+  footR: { background:"transparent", border:"none", padding:0, fontFamily:D_TOK.sans, fontSize:11, color:D_TOK.rose, letterSpacing:"0.10em", textTransform:"lowercase", cursor:"pointer" }
+};
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 </script>
 </body>
 </html>

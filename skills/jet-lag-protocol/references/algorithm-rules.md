@@ -61,16 +61,43 @@ days_to_adapt = ceil(magnitude / rate_for_direction)
 
 ## R4 — Light intensity model (4 tiers)
 
-Discrete approximation of the Zeitzer 2000 sigmoid dose-response.
+Discrete approximation of the dose-response. Updated 2025 to use **melanopic equivalent daylight illuminance (melanopic EDI)** per Brown et al. 2022, which is the field-standard metric (replaces simple photopic lux). Phillips et al. 2019 establishes that the population-mean ED50 is far lower than Zeitzer 2000 reported and that individual sensitivity varies >50× — both reflected below.
 
-| Tier | Lux range (eye) | Practical example | PRC effect |
+| Tier | Melanopic EDI | Photopic lux equiv. (5000K LED) | Practical example |
 |---|---|---|---|
-| **Strong-seek** | ≥5,000 | Direct outdoor sunlight | Saturated |
-| **Mild-seek** | 200–1,000 | Bright indoor, near a window | ~50–80% of saturated |
-| **Soft-avoid** | 10–100 | Dim indoor, sunglasses outdoors | Sub-half-saturation, near-threshold |
-| **Full-avoid** | <2 | Eye mask, blackout, eyes closed | Zero functional dose |
+| **Strong-seek** | ≥ 250 | ~280 lux | Direct outdoor sunlight; well-lit office near window; 10,000 lux therapy box |
+| **Mild-seek** | 50–250 | ~55–280 lux | Bright indoor; well-lit room mid-day |
+| **Soft-avoid** | 10–50 | ~10–55 lux | Dim indoor; warm-white lamp; sunglasses outdoors; screens night-shift |
+| **Full-avoid** | < 1 | ~1 lux | Eye mask; blackout; eyes closed |
 
-**Source:** Zeitzer 2000 (threshold ~2 lux, half-saturation ~120 lux, saturation ~550 lux).
+**Sources:**
+- Brown et al. 2022 — melanopic EDI thresholds: daytime ≥250, evening (3h pre-bed) <10, sleep <1
+- Phillips et al. 2019 — population ED50 ~25 photopic lux ≈ ~14 melanopic EDI; individual range 6–350 lux (>50× spread)
+- Zeitzer 2000 — historical baseline (now superseded by Brown 2022 for prescriptions)
+
+**Conversion notes:** Photopic lux ≠ melanopic EDI. Multiplier depends on light source spectrum:
+- Incandescent/warm LED (2700K): melanopic EDI ≈ 0.45 × photopic lux
+- Daylight LED (5000K): melanopic EDI ≈ 0.9 × photopic lux
+- Daylight (≥6000K, blue sky): melanopic EDI ≈ 1.1 × photopic lux
+
+When a user reports light exposure in lux from a phone meter (which measures photopic), apply the conversion before tier classification.
+
+### R4.1 — Individual light sensitivity (optional personalization)
+
+Per Phillips 2019, ED50 ranges from 6 lux (most sensitive) to 350 lux (least sensitive). Three-bucket approximation:
+
+```
+sensitivity ∈ {sensitive, average, resistant}  # default: average
+
+if sensitivity == "sensitive":
+    soft_avoid_upper  *= 0.4  # tighter evening dim required
+    strong_seek_lower *= 0.5  # smaller dose still effective
+elif sensitivity == "resistant":
+    soft_avoid_upper  *= 1.5
+    strong_seek_lower *= 2.0
+```
+
+Detect sensitivity from: (a) explicit user self-report ("evening light makes me wired" → sensitive; "I can sleep with TV on" → resistant), or (b) feedback from prior protocols (no shift after 2 days at standard dose → resistant; vivid dreams + insomnia at standard dose → sensitive). **In current implementation, default to "average" if no signal.**
 
 ---
 
@@ -280,19 +307,26 @@ The skill consumes generic signals from whichever data source the user has conne
 | Recovery proxy | Garmin body battery; Oura readiness; Whoop recovery %; Apple Watch (computed); manual self-report |
 
 ```
-# Modulation rules (apply on top of the protocol's nominal intensity):
+# Modulation rules (per Chinoy 2021: relative-to-personal-baseline, never absolute):
 
-if 7d_sleep_score < 70 OR HRV_trend < −10% baseline:
+if 7d_sleep_score < (personal_30d_sleep_score_avg − 1 SD)
+   OR HRV_trend < −10% personal baseline:
     pre_flight_drift_rate *= 0.5     # soften pre-flight to 0.5 h/day
     in_flight_nap_aggressiveness *= 0.7
 
-if RHR_trend > +5 bpm vs baseline:
+if RHR_trend > +5 bpm vs personal baseline:
     flag_to_user("RHR elevated — possible illness/recovery debt; consider
                  delaying optional pre-shift component")
 
-if no recent sleep deficit (all signals at or above baseline):
+if no recent sleep deficit (all signals at or above personal baseline):
     run protocol at full nominal intensity
+
+# DO NOT use:
+#   - absolute sleep-score thresholds (e.g. "<70") — vendor-specific scales don't translate
+#   - sleep-stage data (deep/REM absolute durations) — accuracy is too poor per Chinoy 2021
 ```
+
+**Source:** Chinoy 2021 — validated 7 consumer trackers vs PSG. Total sleep time ±15–30 min across vendors; sleep-stage data substantially error-prone. Use trends relative to personal baseline only.
 
 **Fallback if no wearable connected:**
 ```

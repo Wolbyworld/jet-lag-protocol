@@ -4,9 +4,17 @@ The skill's algorithm is grounded in this body of human-circadian research. Ever
 
 ## Phase response curves to light
 
+**Brown, Brainard, Cajochen, Czeisler, Hanifin, Lockley, Lucas, Münch, et al. 2022** — *Recommendations for daytime, evening, and nighttime indoor light exposure to best support physiology, sleep, and wakefulness in healthy adults.* PLOS Biology 20(3):e3001571. ([PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC8929548/))
+
+Replaces photopic lux with **melanopic equivalent daylight illuminance (melanopic EDI)** as the canonical metric. Recommendations: daytime ≥ 250 melanopic EDI, evening (3 h pre-bed) < 10 melanopic EDI, sleep environment < 1 melanopic EDI. Expert consensus from a 23-author international panel. Replaces Zeitzer 2000 as the dose-prescription reference for the field. **Drives the algorithm's R4 light-tier definitions.**
+
+**Phillips, Vidafar, Burns, McGlashan, Anderson, Rajaratnam, Lockley, Cain 2019** — *High sensitivity and interindividual variability in the response of the human circadian system to evening light.* PNAS 116(24):12019–12024. ([PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC6575863/))
+
+Updates Zeitzer 2000 ED50 from ~120 lux to **~25 lux** (population mean) for evening melatonin suppression. **Individual ED50 ranges from 6 to 350 lux — a >50× spread.** The same evening light environment is registered very differently across individuals. Argues for individual-level dose calibration; supports a "light sensitivity" personalization knob.
+
 **Khalsa, Jewett, Cajochen, Czeisler 2003** — *A phase response curve to single bright light pulses in human subjects.* J Physiol 549:945–952. ([PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC2342968/))
 
-Type-1 PRC to a 6.7 h bright-light pulse (~10,000 lux). Peak-to-trough amplitude ~5 h. Maximum delay when light is centered ~3 h before CBT_min; maximum advance when centered ~3 h after CBT_min; crossover at CBT_min. Foundational reference for *when* light shifts the clock.
+Type-1 PRC to a 6.7 h bright-light pulse (~10,000 lux). Peak-to-trough amplitude ~5 h. Maximum delay when light is centered ~3 h before CBT_min; maximum advance when centered ~3 h after CBT_min; crossover at CBT_min. Foundational reference for *when* light shifts the clock — Brown 2022 + Phillips 2019 update the *how much*.
 
 **St Hilaire, Gooley, Khalsa, Kronauer, Czeisler, Lockley 2012** — *Human phase response curve to a 1 h pulse of bright white light.* J Physiol 590:3035–3045. ([PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC3406389/))
 
@@ -66,6 +74,10 @@ Process S (homeostatic sleep pressure, builds during wake, decays during sleep) 
 
 ## Jet lag — operational protocols
 
+**Roach, Sargent 2019** — *Interventions to minimize jet lag after westward and eastward flight.* Frontiers in Physiology 10:927. ([open access](https://www.frontiersin.org/articles/10.3389/fphys.2019.00927/full))
+
+Comprehensive synthesis review of 2009–2019 jet-lag intervention literature. Replaces Eastman & Burgess 2009 as the "current synthesis" reference. Re-confirms the 1.0 h/day advance / 1.5 h/day delay ceilings. **Strengthens wake-time light as the dominant zeitgeber for both pre-flight prep and post-arrival recovery** (10+ new RCTs since 2009). Updates direction asymmetry attribution: τ ≈ 24.18 h + delay-zone PRC amplitude > advance-zone + adherence advantages of delay protocols. Justifies R3 ceilings, R8.3 wake-anchor rule, and R11 short-trip skip with current evidence.
+
 **Eastman, Burgess 2009** — *How to travel the world without jet lag.* Sleep Med Clin 4:241–255. ([PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC2829880/))
 
 Synthesis of pre-flight, in-flight, and post-arrival protocols for advance and delay shifts. Practical adaptation rates: with intervention, ~1.0 h/day advance, ~1.5 h/day delay. Without intervention (real-world flights), ~57 min/day advance, ~92 min/day delay. Asymmetry is grounded in human τ ≈ 24.2 h (slightly long → easier to delay than advance).
@@ -101,5 +113,7 @@ The skill consumes summary signals from any wearable or health source (Garmin, A
 
 Modulation rationale comes from sport-science / training-load literature on autonomic recovery, not from the circadian PRC literature directly. Conservative defaults: when 7-day signals indicate poor recovery, soften the protocol. References (background, not algorithm-binding):
 
+- **Chinoy, Cuellar, Huwa, Jameson, Watson, Bessman, Hirsch, Cooper, Drake, Markwald 2021** — *Performance of seven consumer sleep-tracking devices compared with polysomnography.* Sleep 44(5):zsaa291. ([PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC8121290/))
+  → Direct validation of 7 consumer trackers (Oura, Garmin, Fitbit, Whoop, etc.) vs PSG. Total sleep time within ±15–30 min; sleep-stage data substantially error-prone (do not gate on absolute deep/REM). **Sleep-score and HRV metrics are reliable for trend (relative to personal baseline), not for absolute thresholds across devices.** Drives R10's shift from absolute thresholds to relative-to-baseline.
 - **Plews, Laursen, Stanley, Kilding, Buchheit 2013** — *Training adaptation and heart rate variability.* Sports Med 43:773–781. (HRV-based training prescription; rationale for using HRV trend as a recovery proxy.)
 - **Knufinke, Nieuwenhuys, Maase, Moen, Geurts, Coenen, Kompier 2018** — *Effects of natural between-days variation in sleep on elite athletes' psychomotor vigilance and sport-specific measures of performance.* J Sports Sci Med 17:515–524. (Sleep-quality variation effects on next-day performance; informs how seriously to weight a single bad night.)
