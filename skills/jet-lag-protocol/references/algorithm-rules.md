@@ -210,15 +210,15 @@ emit a **recommended primary in-flight sleep block** anchored to destination nig
 
 ```
 delay   (westward shift):
-    block_start = max(longest_leg.depart + arrival_buffer, dest_night_start)
+    block_start = max(longest_leg.depart + leg_start_buffer, dest_night_start)
     block_end   = min(block_start + block_target,
-                      longest_leg.arrival − arrival_buffer,
+                      longest_leg.arrival − leg_end_buffer,
                       dest_night_end + creep)
 
 advance (eastward shift):
-    block_end   = min(longest_leg.arrival − arrival_buffer, dest_night_end)
+    block_end   = min(longest_leg.arrival − leg_end_buffer, dest_night_end)
     block_start = max(block_end − block_target,
-                      longest_leg.depart + arrival_buffer,
+                      longest_leg.depart + leg_start_buffer,
                       dest_night_start − creep)
 ```
 
@@ -229,7 +229,8 @@ advance (eastward shift):
 | Magnitude threshold | 6 h | Below this the in-flight block isn't worth the disruption. |
 | Destination-night overlap threshold | 3 h | Below this the flight timing can't carry destination-night sleep. |
 | `block_target` | 6 h | Cap. Roach & Sargent 2019 supports ~5–7 h main sleep. |
-| `arrival_buffer` | 60 min | Wake before descent / climb-out; don't sleep through pushback. |
+| `leg_start_buffer` | 30 min | Don't sleep through pushback / climb-out. |
+| `leg_end_buffer` | 60 min | Wake before descent / disembarkation. |
 | `creep` (past dest-night boundary) | 90 min | Sleep-bank extension when leg time permits (Burgess Penn CBTI 2020). |
 
 All five are engineering heuristics. See Parameter quarantine.
@@ -730,7 +731,8 @@ These are engineering heuristics — useful defaults, but **not directly literat
 - magnitude ≥ 6 h trigger.
 - destination-night overlap ≥ 3 h trigger.
 - `block_target = 6 h`.
-- `arrival_buffer = 60 min`.
+- `leg_start_buffer = 30 min` (pushback / climb-out).
+- `leg_end_buffer = 60 min` (descent / disembarkation).
 - `creep = 90 min`.
 - emergency nap upper bound `20–30 min`; required ≥ 6 h gap from main block.
 
@@ -798,6 +800,7 @@ These are engineering heuristics — useful defaults, but **not directly literat
 - **R11 rewritten.** Trip-length primary tiered logic (2 / 3 / 5 night gates), Arendt 2009.
 - **R2 expanded.** "Evaluate both directions" guidance for advance ≥ 8 h shifts.
 - **Parameter quarantine appendix.** Expanded to cover every heuristic constant in the file. Single annotation per entry: "engineering heuristic, not directly literature-derived."
+- **R5.2 buffer naming.** Split the single `arrival_buffer = 60 min` constant into `leg_start_buffer = 30 min` (pushback / climb-out) and `leg_end_buffer = 60 min` (descent / disembarkation), matching the production code.
 
 ### v0.2.0 — earlier 2026 (post-2015 literature integration)
 - Melanopic EDI introduced via Brown et al. 2022.
