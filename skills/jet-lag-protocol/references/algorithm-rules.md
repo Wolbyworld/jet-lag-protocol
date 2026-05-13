@@ -233,7 +233,7 @@ advance (eastward shift):
 | `leg_end_buffer` | 60 min | Wake before descent / disembarkation. |
 | `creep` (past dest-night boundary) | 90 min | Sleep-bank extension when leg time permits (Burgess Penn CBTI 2020). |
 
-All five are engineering heuristics. See Parameter quarantine.
+All six are engineering heuristics. See Parameter quarantine.
 
 #### Framing
 
