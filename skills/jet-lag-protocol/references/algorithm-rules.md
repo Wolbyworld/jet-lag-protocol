@@ -56,18 +56,24 @@ if magnitude > 12:
     magnitude = 24 − magnitude
 ```
 
-For large eastward shifts (≥ 8h advance), the simple 12 h flip is a coarse default. The richer rule evaluates both directions and picks based on predicted adaptation days plus adherence/light-control feasibility:
+For large eastward shifts (≥ 8h advance), the simple 12 h flip is a coarse default. The richer rule evaluates both directions, but only flips when the long-way magnitude is genuinely shorter:
 
 ```
 # Heuristic — evaluate-both for borderline advances.
 if direction == "advance" and magnitude >= 8:
-    candidate_advance = (advance, magnitude,           rate_advance)
-    candidate_delay   = (delay,   24 − magnitude,      rate_delay)
-    pick whichever:
-        - fewer predicted days_to_adapt
-        - feasible light/behavior control (red-eye departures, etc.)
-        - lower expected sleep debt
+    candidate_delay_magnitude = 24 − magnitude
+    if candidate_delay_magnitude >= magnitude:
+        # Long-way magnitude is bigger or equal; stay advance regardless
+        # of days arithmetic. Going around the long way for a small days
+        # saving is non-intuitive and not user-supported.
+        keep advance
+    else:
+        # Long-way magnitude is genuinely shorter; compare days.
+        pick whichever yields fewer days_to_adapt; tie-break by smaller
+        magnitude.
 ```
+
+In practice the magnitude gate is dead across `magnitude ∈ [8, 12]` — the long-way leg (12–16 h) is always ≥ the advance magnitude — so this borderline-advance heuristic almost never flips. Genuinely large eastward shifts still flip via the coarse `magnitude > 12` rule above.
 
 The `magnitude >= 8` trigger is an engineering heuristic; the 12 h flip itself is heuristic too. Both go in Parameter quarantine.
 
@@ -782,6 +788,9 @@ These are engineering heuristics — useful defaults, but **not directly literat
 ---
 
 ## Calibration changelog
+
+### v0.4.0 — 2026-05-13 (R2 evaluate-both magnitude gate)
+- **R2 tightened.** Evaluate-both flip now requires the long-way delay magnitude to be STRICTLY SMALLER than the advance magnitude before any days-arithmetic comparison. The pre-v0.4.0 gate flipped on a days-only tiebreak (e.g. 11 h advance → 13 h delay), producing non-intuitive long-way plans for borderline cases like SFO→DXB. Net effect: the [8, 12] h evaluate-both window is near-dead; only the coarse `|Δ| > 12 h` rule flips real long-way wins.
 
 ### v0.3.0 — 2026-05-13 (science-integrity pass)
 - **R6 rewritten.** Phase-relative timing (`current_DLMO − 3 h ± 1 h`); explicit removal of `takeoff + 1 h` and `block_start − 15 min` anchors. Default dose narrowed to **0.5 mg oral immediate-release** (sublingual not supported under these timings). Math corrected: `DLMO − 3 h = CBT_min − 10 h` (not `− 10.5 h`); bedtime-anchored shortcut is intermediate-only. Sedating-medication / alcohol suppression added.
